@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::content})}">
+<th:block th:fragment="content">
+
+    <!-- All styles are self-contained in this block and will not affect other pages. -->
+    <style>
+        :root {
+            --bg:#131820;
+            --panel:#1e2429;
+            --panel-alt:#242a30;
+            --border:#2a3138;
+            --border-soft:#21272d;
+            --accent:#e6c567;
+            --blue:#1674ff;
+            --text:#e5e9ea;
+            --text-dim:#7d8587;
+            --font:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Arial,sans-serif;
+        }
+        .payment-page-wrapper {
+            max-width: 950px;
+            margin: 3rem auto;
+            font-family: var(--font);
+        }
+        .payment-invoice-card {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            color: var(--text);
+            overflow: hidden;
+        }
+        .invoice-header {
+            background-color: var(--panel-alt);
+            padding: 2rem 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid var(--border);
+        }
+        .invoice-header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--text);
+            letter-spacing: .08em;
+        }
+        .invoice-header .details {
+            text-align: right;
+        }
+        .invoice-header .booking-id {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+        .invoice-header .booking-date {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+        }
+        .invoice-section {
+            padding: 2rem 2.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .invoice-section:last-child {
+            border-bottom: none;
+        }
+        .section-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin: 0 0 1.5rem 0;
+        }
+        .client-details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+        .detail-item .label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+        .detail-item .value {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+        .service-table-container {
+            border: 1px solid var(--border-soft);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .service-table-header, .service-table-row {
+            display: grid;
+            grid-template-columns: 50px 1fr 120px;
+            gap: 1.5rem;
+            padding: 1rem;
+            align-items: center;
+        }
+        .service-table-header {
+            background-color: var(--panel-alt);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: .08em;
+        }
+        .service-table-header .header-amount, .service-table-row .col-amount {
+            text-align: right;
+        }
+        .service-table-row {
+            border-top: 1px solid var(--border-soft);
+        }
+        .service-name {
+            font-weight: 500;
+            color: var(--text);
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+        .service-details, .calculation-detail {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
+        .calculation-breakdown {
+            background-color: #121518;
+            border: 1px solid var(--border-soft);
+            border-radius: 4px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+        }
+        .breakdown-header { font-weight: 600; color: var(--text-dim); margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-soft); }
+        .breakdown-item { display: flex; justify-content: space-between; padding: 0.25rem 0; }
+        .breakdown-item.total-breakdown { font-weight: 700; color: var(--accent); margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--border-soft);}
+        .service-table-footer {
+            display: flex;
+            justify-content: flex-end;
+            padding: 1.5rem;
+            background-color: var(--panel-alt);
+            border-top: 1px solid var(--border);
+        }
+        .total-due .label {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-dim);
+            margin-right: 1.5rem;
+        }
+        .total-due .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .payment-options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .payment-option-label {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            background-color: #121518;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+        }
+        .payment-option-label:hover {
+            background-color: var(--panel-alt);
+            border-color: var(--border-soft);
+        }
+        .payment-option-input {
+            display: none;
+        }
+        .payment-option-input:checked + .payment-option-label {
+            border-color: var(--accent);
+            background-color: rgba(230, 197, 103, 0.1);
+            box-shadow: 0 0 0 2px rgba(230, 197, 103, 0.2);
+        }
+        .payment-icon {
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+        .payment-text {
+            font-weight: 500;
+            color: var(--text);
+        }
+        .invoice-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem 2.5rem;
+            background-color: var(--panel-alt);
+        }
+        .terms-text {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            max-width: 50%;
+        }
+        .actions-group {
+            display: flex;
+            gap: 1rem;
+        }
+        .btn-invoice {
+            font-family: var(--font);
+            display: inline-flex;
+            align-items:center;
+            justify-content:center;
+            padding:.75rem 1.5rem;
+            font-size:.55rem;
+            letter-spacing:.34em;
+            font-weight:600;
+            text-transform:uppercase;
+            border-radius: 6px;
+            border:1px solid var(--border-soft);
+            text-decoration: none;
+            cursor:pointer;
+            transition: all .3s;
+        }
+        .btn-secondary {
+            background-color: transparent;
+            border-color: var(--border);
+            color: var(--text-dim);
+        }
+        .btn-secondary:hover {
+            background-color: var(--panel-alt);
+            border-color: var(--border-soft);
+            color: var(--text);
+            transform: translateY(-2px);
+        }
+        .btn-primary {
+            background-color: var(--blue);
+            border-color: #0f65e8;
+            color: #ffffff;
+            box-shadow:0 4px 10px -4px rgba(22,116,255,.55);
+        }
+        .btn-primary:hover {
+            background-color: #2682ff;
+            transform: translateY(-2px);
+            box-shadow:0 8px 20px -10px rgba(38,130,255,.7);
+        }
+    </style>
+
+    <div class="payment-page-wrapper">
+        <div class="payment-invoice-card">
+
+            <!-- Header -->
+            <div class="invoice-header">
+                <div>
+                    <h1>Payment Summary</h1>
+                </div>
+                <div class="details">
+                    <div class="booking-id" th:text="${booking.bookingId}">#ADB-2024-001</div>
+                    <div class="booking-date" th:text="${#temporals.format(#temporals.createNow(), 'MMM dd, yyyy')}">Dec 15, 2024</div>
+                </div>
+            </div>
+
+            <!-- Client Details -->
+            <div class="invoice-section">
+                <h2 class="section-title">Bill To</h2>
+                <div class="client-details-grid">
+                    <div class="detail-item">
+                        <span class="label">Client Name</span>
+                        <span class="value" th:text="${booking.fullName}">John Doe</span>
+                    </div>
+                    <div class="detail-item" th:if="${booking.companyName != null and !booking.companyName.isEmpty()}">
+                        <span class="label">Company</span>
+                        <span class="value" th:text="${booking.companyName}">Acme Corporation</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">Phone</span>
+                        <span class="value" th:text="${booking.contactNumber}">+123-456-7890</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">Email</span>
+                        <span class="value" th:text="${booking.email}">user@example.com</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Breakdown -->
+            <div class="invoice-section">
+                <h2 class="section-title">Description of Service</h2>
+                <div class="service-table-container">
+                    <div class="service-table-header">
+                        <div>Qty</div>
+                        <div>Service</div>
+                        <div class="header-amount">Amount</div>
+                    </div>
+
+                    <!-- TV Ad (SAFE) -->
+                    <th:block th:if="${booking.serviceType.name() == 'TV_ADVERTISEMENT'}">
+                        <th:block th:if="${calculationBreakdown != null and booking.optionOne != null}">
+                            <div th:each="channel : ${#strings.arraySplit(booking.optionOne, ',')}" class="service-table-row">
+                                <div class="col-qty">1</div>
+                                <div class="col-service">
+                                    <span class="service-name" th:text="'TV Advertisement - ' + ${channel.trim()}"></span>
+                                    <span class="service-details" th:text="${calculationBreakdown.duration} + 's | ' + ${calculationBreakdown.timeSlots} + ' | ' + ${calculationBreakdown.days} + ' day(s)'"></span>
+                                </div>
+                                <div class="col-amount" th:text="'Rs. ' + ${#numbers.formatInteger(calculationBreakdown.perChannelTotal, 0, 'COMMA')}"></div>
+                            </div>
+                        </th:block>
+                    </th:block>
+
+                    <!-- Radio Ad (SAFE) -->
+                    <th:block th:if="${booking.serviceType.name() == 'RADIO_PROMOTION'}">
+                        <th:block th:if="${calculationBreakdown != null and booking.optionOne != null}">
+                            <div th:each="channel : ${#strings.arraySplit(booking.optionOne, ',')}" class="service-table-row">
+                                <div class="col-qty">1</div>
+                                <div class="col-service">
+                                    <span class="service-name" th:text="'Radio Promotion - ' + ${channel.trim()}"></span>
+                                    <span class="service-details" th:text="${calculationBreakdown.duration} + 's | ' + ${calculationBreakdown.timeSlots} + ' | ' + ${calculationBreakdown.plays} + ' plays/day'"></span>
+                                </div>
+                                <div class="col-amount" th:text="'Rs. ' + ${#numbers.formatInteger(calculationBreakdown.perChannelTotal, 0, 'COMMA')}"></div>
+                            </div>
+                        </th:block>
+                    </th:block>
+
+                    <!-- Social Media Ad (SAFE) -->
+                    <th:block th:if="${booking.serviceType.name() == 'SOCIAL_MEDIA_CAMPAIGN'}">
+                        <div th:if="${socialBreakdown != null}" class="service-table-row">
+                            <div class="col-qty" th:text="${socialBreakdown.platformCount}"></div>
+                            <div class="col-service">
+                                <span class="service-name">Social Media Campaign</span>
+                                <span class="service-details" th:text="'Platforms: ' + ${socialBreakdown.platforms} + ' | Duration: ' + ${socialBreakdown.duration} + ' days'"></span>
+                            </div>
+                            <div class="col-amount" th:text="'Rs. ' + ${#numbers.formatInteger(booking.totalAmount, 0, 'COMMA')}"></div>
+                        </div>
+                    </th:block>
+
+                    <!-- Newspaper Ad (SAFE) -->
+                    <th:block th:if="${booking.serviceType.name() == 'NEWSPAPER_AD'}">
+                        <div th:if="${newspaperBreakdown != null}" class="service-table-row">
+                            <div class="col-qty" th:text="${newspaperBreakdown.newspaperCount}"></div>
+                            <div class="col-service">
+                                <span class="service-name">Newspaper Ad</span>
+                                <span class="service-details" th:text="${newspaperBreakdown.adSize} + ' | ' + ${newspaperBreakdown.colorType} + ' | ' + ${newspaperBreakdown.days} + ' days'"></span>
+                            </div>
+                            <div class="col-amount" th:text="'Rs. ' + ${#numbers.formatInteger(booking.totalAmount, 0, 'COMMA')}"></div>
+                        </div>
+                    </th:block>
+
+                    <!-- Billboard Ad (SAFE) -->
+                    <th:block th:if="${booking.serviceType.name() == 'BILLBOARD_ADVERTISING'}">
+                        <th:block th:if="${billboardBreakdown != null and billboardBreakdown.locationCosts != null}">
+                            <div th:each="locationCost : ${billboardBreakdown.locationCosts}" class="service-table-row">
+                                <div class="col-qty">1</div>
+                                <div class="col-service">
+                                    <span class="service-name" th:text="'Billboard Ad: ' + ${locationCost.key}"></span>
+                                    <span class="service-details" th:text="${billboardBreakdown.billboardSize} + ' | ' + ${billboardBreakdown.days} + ' days'"></span>
+                                </div>
+                                <div class="col-amount" th:text="'Rs. ' + ${#numbers.formatInteger(locationCost.value, 0, 'COMMA')}"></div>
+                            </div>
+                        </th:block>
+                    </th:block>
+
+                    <!-- Digital Banner Ad (SAFE) -->
+                    <th:block th:if="${booking.serviceType.name() == 'DIGITAL_BANNER'}">
+                        <div th:if="${digitalBannerBreakdown != null}" class="service-table-row">
+                            <div class="col-qty" th:text="${digitalBannerBreakdown.websiteCount}"></div>
+                            <div class="col-service">
+                                <span class="service-name">Digital Banner</span>
+                                <span class="service-details" th:text="${digitalBannerBreakdown.bannerSize} + ' | Websites: ' + ${digitalBannerBreakdown.websiteTypes}"></span>
+                            </div>
+                            <div class="col-amount" th:text="'Rs. ' + ${#numbers.formatInteger(digitalBannerBreakdown.totalCost, 0, 'COMMA')}"></div>
+                        </div>
+                    </th:block>
+
+                    <!-- Other Services (Fallback) -->
+                    <th:block th:if="${!#lists.contains({'TV_ADVERTISEMENT', 'RADIO_PROMOTION', 'SOCIAL_MEDIA_CAMPAIGN', 'NEWSPAPER_AD', 'BILLBOARD_ADVERTISING', 'DIGITAL_BANNER'}, booking.serviceType.name())}">
+                        <div class="service-table-row">
+                            <div class="col-qty">1</div>
+                            <div class="col-service">
+                                <span class="service-name" th:text="${booking.serviceType}"></span>
+                                <span class="service-details" th:if="${booking.notes != null and !booking.notes.isEmpty()}" th:text="${booking.notes}"></span>
+                            </div>
+                            <div class="col-amount" th:text="'Rs. ' + ${#numbers.formatInteger(booking.totalAmount, 0, 'COMMA')}"></div>
+                        </div>
+                    </th:block>
+                </div>
+                <div class="service-table-footer">
+                    <div class="total-due">
+                        <span class="label">Total Due</span>
+                        <span class="value" th:text="'Rs. ' + ${#numbers.formatInteger(booking.totalAmount, 0, 'COMMA')}"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Method -->
+            <div class="invoice-section">
+                <h2 class="section-title">Choose Payment Method</h2>
+                <div class="payment-options-grid">
+                    <div class="payment-option">
+                        <input type="radio" id="card" name="paymentMethod" value="card" class="payment-option-input" checked>
+                        <label for="card" class="payment-option-label">
+                            <span class="payment-icon">💳</span>
+                            <span class="payment-text">Credit/Debit Card</span>
+                        </label>
+                    </div>
+                    <div class="payment-option">
+                        <input type="radio" id="bank" name="paymentMethod" value="bank" class="payment-option-input">
+                        <label for="bank" class="payment-option-label">
+                            <span class="payment-icon">🏦</span>
+                            <span class="payment-text">Bank Transfer</span>
+                        </label>
+                    </div>
+                    <div class="payment-option">
+                        <input type="radio" id="cash" name="paymentMethod" value="cash" class="payment-option-input">
+                        <label for="cash" class="payment-option-label">
+                            <span class="payment-icon">💵</span>
+                            <span class="payment-text">Cash Payment</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="invoice-footer">
+                <p class="terms-text">By proceeding, you agree to our terms of service. All payments are processed securely.</p>
+                <div class="actions-group">
+                    <a class="btn-invoice btn-secondary" th:href="@{'/book/' + ${booking.serviceType.name().toLowerCase()} + '?edit=' + ${booking.id}}">Edit Booking</a>
+                    <button type="button" class="btn-invoice btn-primary" id="pay-now-btn">Pay Now</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Hidden field to store booking ID -->
+    <input type="hidden" name="bookingId" th:value="${booking.bookingId}">
+
+    <!-- Original script preserved -->
+    <script>
+        // Renamed button to avoid conflicts and ensure it's unique
+        const payNowBtnInvoice = document.getElementById('pay-now-btn');
+
+        payNowBtnInvoice.addEventListener('click', function() {
+            processPayment();
+        });
+
+        function processPayment() {
+            const selectedMethod = document.querySelector('input[name="paymentMethod"]:checked');
+            const bookingId = document.querySelector('input[name="bookingId"]').value;
+
+            if (selectedMethod && selectedMethod.value === 'card') {
+                window.location.href = '/card-payment/' + bookingId;
+            } else if (selectedMethod && selectedMethod.value === 'bank') {
+                window.location.href = '/bank-transfer?bookingId=' + bookingId;
+            } else if (selectedMethod && selectedMethod.value === 'cash') {
+                window.location.href = '/cash-payment/' + bookingId;
+            } else {
+                window.location.href = '/book?success=true';
+            }
+        }
+
+        document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const method = this.value;
+                switch(method) {
+                    case 'card':
+                        payNowBtnInvoice.innerHTML = 'Pay with Card';
+                        break;
+                    case 'bank':
+                        payNowBtnInvoice.innerHTML = 'Get Bank Details';
+                        break;
+                    case 'cash':
+                        payNowBtnInvoice.innerHTML = 'Schedule Payment';
+                        break;
+                }
+            });
+        });
+    </script>
+
+</th:block>
+</html>

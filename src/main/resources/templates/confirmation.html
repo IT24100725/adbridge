@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title} ?: 'Booking Confirmation - AdBridgeLanka'">Booking Confirmation - AdBridgeLanka</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link th:href="@{/css/landing.css}" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg:#131820;
+            --accent:#e6c567;
+            --text:#e5e9ea;
+            --text-dim:#7d8587;
+            --text-faint:#556066;
+            --font:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Arial,sans-serif;
+        }
+
+        /* Dark gradient background like payment pages */
+        .confirmation-page {
+            background: radial-gradient(circle at 20% 40%, rgba(25,44,66,.28), transparent 65%), linear-gradient(115deg, #0c1013, #0b0e10 60%, #0b0d0f) !important;
+            min-height: 100vh !important;
+        }
+
+        .confirmation-container {
+            max-width: 900px !important;
+            margin: 0 auto !important;
+            padding: 140px 2rem 100px 2rem !important;
+        }
+
+        .confirmation-content {
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Thank You Section */
+        .thank-you-section {
+            margin-bottom: 3rem;
+        }
+
+        .thank-you-title {
+            font-size: 3.5rem;
+            font-weight: 500;
+            color: #fff;
+            margin-bottom: 1.5rem;
+            font-family: var(--font);
+            letter-spacing: 0.1em;
+        }
+
+        .thank-you-message {
+            font-size: 1rem;
+            color: var(--text-dim);
+            line-height: 1.8;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Booking Summary Section */
+        .booking-summary-section {
+            background: rgba(30, 36, 41, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 2.5rem;
+            margin: 3rem 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        .summary-details {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .summary-value {
+            font-size: 0.95rem;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .summary-value.amount {
+            font-size: 1.3rem;
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        /* Navigator-style buttons with animation */
+        .confirmation-actions {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            align-items: center;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .confirmation-actions .btn {
+            background: transparent !important;
+            color: var(--text-dim) !important;
+            border: none !important;
+            font-size: 0.9rem !important;
+            letter-spacing: .32em !important;
+            text-transform: uppercase !important;
+            font-weight: 500 !important;
+            font-family: var(--font) !important;
+            padding: .35rem 0 .4rem !important;
+            cursor: pointer !important;
+            position: relative !important;
+            transition: color .4s !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            height: 56px !important;
+            min-width: 200px !important;
+            text-decoration: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Navigator underline animation */
+        .confirmation-actions .btn:after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 1px;
+            width: 0;
+            background: linear-gradient(90deg, var(--accent), transparent);
+            opacity: .55;
+            transition: width .5s;
+        }
+
+        .confirmation-actions .btn:hover {
+            color: #fff !important;
+            background: transparent !important;
+        }
+
+        .confirmation-actions .btn:hover:after {
+            width: 100%;
+        }
+
+        /* Get Invoice button matches other buttons */
+        .confirmation-actions .btn.accent {
+            color: var(--text-dim) !important;
+        }
+
+        .confirmation-actions .btn.accent:hover {
+            color: #fff !important;
+        }
+
+        @media (max-width: 768px) {
+            .confirmation-container {
+                padding: 120px 1.5rem 80px 1.5rem !important;
+            }
+
+            .thank-you-title {
+                font-size: 2.5rem;
+            }
+
+            .booking-summary-section {
+                padding: 1.5rem;
+            }
+
+            .confirmation-actions {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .confirmation-actions .btn {
+                min-width: 250px;
+                font-size: 0.8rem !important;
+            }
+        }
+    </style>
+</head>
+<body style="min-height:100vh;display:flex;flex-direction:column;">
+    <header class="main-nav">
+        <div class="nav-inner">
+            <a class="logo" th:href="@{/}">Ad<span>BridgeLanka</span></a>
+            <nav class="nav-links">
+                <a th:href="@{/#hero}">Home</a>
+                <a th:href="@{/services}">Services</a>
+                <a th:if="${showBookInNav} != true" th:href="@{/#process}">Process</a>
+                <a th:if="${showBookInNav} != true" th:href="@{/#team}">Team</a>
+                <a th:if="${showBookInNav} != true" th:href="@{/#clients}">Clients</a>
+                <a th:href="@{/contact}">Contact</a>
+                <a th:if="${showBookInNav} == true" th:href="@{/my-bookings}">
+                    <span th:if="${session.user != null}">My Bookings</span>
+                    <span th:if="${session.user == null}">Book</span>
+                </a>
+                <a th:if="${showPaymentInNav} == true" th:href="@{/payment}">
+                    <span th:if="${session.user != null}">My Payments</span>
+                    <span th:if="${session.user == null}">Payment</span>
+                </a>
+                <a th:if="${showBookInNav == true and showPaymentInNav != true and session.user == null}" th:href="@{/book}" onclick="showPaymentAlert(event)">
+                    Payment
+                </a>
+                <a th:if="${showBookInNav == true and showPaymentInNav != true and session.user != null}" th:href="@{/payment}">
+                    My Payments
+                </a>
+                <!-- User Dashboard Navigation - only show when user is logged in and on user pages -->
+                <a th:if="${session.user != null and (showBookInNav == true or showPaymentInNav == true)}" th:href="@{/notifications}">Notifications</a>
+            </nav>
+            <div class="nav-auth">
+                <a th:if="${session.user == null}"
+                   th:href="@{/login}"
+                   onclick="this.href = this.href + '?next=' + encodeURIComponent(window.location.pathname + window.location.search);"
+                   class="btn small login-btn">Login</a>
+                <div th:if="${session.user != null}" class="user-menu">
+                    <span class="user-name" th:text="${session.user.fullName}">User</span>
+                    <form th:action="@{/logout}" method="post" style="display:inline;">
+                        <button type="submit" class="btn small logout-btn">Logout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-wrapper" style="flex:1 0 auto;">
+        <div class="confirmation-page">
+            <!-- Main Content -->
+            <div class="confirmation-container">
+                <div class="confirmation-content">
+                    <!-- Thank You Message -->
+                    <div class="thank-you-section">
+                        <h1 class="thank-you-title">Thank You!</h1>
+                        <p class="thank-you-message">
+                            Your request has been received and is under review by our team. 
+                            Thank you for choosing AdBridge Lanka.
+                        </p>
+                    </div>
+
+                    <!-- Booking Summary -->
+                    <div class="booking-summary-section">
+                        <h2 class="section-title">Booking Summary</h2>
+                        <div class="summary-details">
+                            <!-- Common fields for all services -->
+                            <div class="summary-item">
+                                <span class="summary-label">Booking ID:</span>
+                                <span class="summary-value" th:text="${booking.bookingId}">ADB-2024-001</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Payment ID:</span>
+                                <span class="summary-value" th:text="${paymentId != null ? paymentId : 'Processing...'}">PAY-2024-001</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Service:</span>
+                                <span class="summary-value" th:text="${booking.serviceType}">TV Advertisement</span>
+                            </div>
+                            
+                            <!-- Social Media Campaign specific fields -->
+                            <div th:if="${booking.serviceType.name() == 'SOCIAL_MEDIA_CAMPAIGN'}">
+                                <div class="summary-item">
+                                    <span class="summary-label">Platforms:</span>
+                                    <span class="summary-value" th:text="${booking.optionOne}">Facebook, Instagram</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">Campaign Duration:</span>
+                                    <span class="summary-value" th:text="${booking.optionTwo}">30 days</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">Content Type:</span>
+                                    <span class="summary-value" th:text="${booking.optionThree}">Video Posts</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Newspaper Ad specific fields -->
+                            <div th:if="${booking.serviceType.name() == 'NEWSPAPER_AD'}">
+                                <div class="summary-item">
+                                    <span class="summary-label">Newspaper Name:</span>
+                                    <span class="summary-value" th:text="${booking.optionOne}">Daily News, Sunday Times</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">Number of Days:</span>
+                                    <span class="summary-value" th:text="${booking.optionFour}">3 days</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">Ad Size:</span>
+                                    <span class="summary-value" th:text="${booking.optionTwo}">Half Page</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">Colour Option:</span>
+                                    <span class="summary-value" th:text="${booking.optionThree}">Full Color</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Billboard Ad specific fields -->
+                            <div th:if="${booking.serviceType.name() == 'BILLBOARD_ADVERTISING'}">
+                                <div class="summary-item">
+                                    <span class="summary-label">Locations:</span>
+                                    <span class="summary-value" th:text="${booking.optionOne}">Colombo, Kandy</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">Billboard Size:</span>
+                                    <span class="summary-value" th:text="${booking.optionTwo}">Large (48x12)</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">Display Duration:</span>
+                                    <span class="summary-value" th:text="${booking.optionThree}">30 days</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Digital Banner specific fields -->
+                            <div th:if="${booking.serviceType.name() == 'DIGITAL_BANNER'}">
+                                <div class="summary-item">
+                                    <span class="summary-label">Website Type:</span>
+                                    <span class="summary-value" th:text="${booking.optionOne}">E-commerce, News Portal</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">Tracking Required:</span>
+                                    <span class="summary-value" th:text="${booking.optionFour}">Yes</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">Banner Size:</span>
+                                    <span class="summary-value" th:text="${booking.optionTwo}">728x90 (Leaderboard)</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">Duration:</span>
+                                    <span class="summary-value" th:text="${booking.optionFive}">14 days</span>
+                                </div>
+                            </div>
+                            
+                            <!-- TV Advertisement and Radio Promotion fields -->
+                            <div th:if="${booking.serviceType.name() == 'TV_ADVERTISEMENT' or booking.serviceType.name() == 'RADIO_PROMOTION'}">
+                                <div class="summary-item">
+                                    <span class="summary-label">Platforms:</span>
+                                    <span class="summary-value" th:text="${booking.optionOne}">Sirasa TV, Hiru TV</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">Time Slots:</span>
+                                    <span class="summary-value" th:text="${booking.optionFour}">Morning, Evening</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">Duration:</span>
+                                    <span class="summary-value" th:text="${booking.optionTwo}">30 seconds</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">Days:</span>
+                                    <span class="summary-value" th:text="${booking.optionThree}">7 days</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Total Amount - always shown -->
+                            <div class="summary-item">
+                                <span class="summary-label">Total Amount:</span>
+                                <span class="summary-value amount" th:text="'LKR ' + ${#numbers.formatInteger(booking.totalAmount, 0, 'COMMA')}">LKR 26,000</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="confirmation-actions">
+                        <a th:href="@{/}" class="btn primary">Back to Homepage</a>
+                        <a th:href="@{/services}" class="btn secondary">View Other Services</a>
+                        <!-- Only show invoice button if payment method is not cash -->
+                        <a th:if="${paymentMethod != 'cash' and paymentMethod != 'CASH' and paymentMethod != null}" th:href="@{'/invoice/' + ${booking.bookingId}}" class="btn accent">Get Invoice</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        © <span th:text="${#temporals.format(#temporals.createNow(),'yyyy')}"></span> AdBridgeLanka
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::content})}">
+<th:block th:fragment="content">
+
+    <!-- HERO -->
+    <section class="section">
+        <div class="section-head">
+            <h2>Our Advertising Services</h2>
+            <p>Choose what fits your brand. Strategy, production, and placement included.</p>
+        </div>
+    </section>
+
+    <!-- SERVICES ALTERNATING -->
+    <section class="section alt">
+        <div class="features">
+            <!-- 1. TV Advertisements -->
+            <article id="svc-tv" class="feature">
+                <div class="feature-media" style="background-image:url('https://vtrep.com/wp-content/uploads/2015/11/How-To-Shoot-Television-Commercials.jpeg');"></div>
+                <div class="feature-body">
+                    <h3 class="feature-title">TV Advertisements</h3>
+                    <p class="feature-intro">Show your brand on popular Sri Lankan TV channels. Ideal for nationwide reach.</p>
+                    <ul class="feature-meta">
+                        <li>We handle script writing, video production, and scheduling</li>
+                        <li>Campaign duration: 1 day to 1 month</li>
+                        <li>Est. setup time: 30 days</li>
+                    </ul>
+                    <div class="feature-actions">
+                        <a class="link-underline" th:href="@{/book/TV_ADVERTISEMENT}">Book Now</a>
+                        <a class="link-underline" href="#pricing-tv">View Pricing</a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- 2. Radio Promotions -->
+            <article id="svc-radio" class="feature reverse">
+                <div class="feature-media" style="background-image:url('https://media.istockphoto.com/id/1216688202/photo/portrait-of-girl-with-beaming-smile-in-eyewear-holding-boom-box-on-shoulder-looking-at-camera.jpg?s=612x612&w=0&k=20&c=4G-MsXRIiU5qtGt1Xj9FBrNCO-xNp6e_z8ItBx7sILA=');"></div>
+                <div class="feature-body">
+                    <h3 class="feature-title">Radio Promotions</h3>
+                    <p class="feature-intro">Catchy audio ads for FM radio stations. Great for local reach and quick messages.</p>
+                    <ul class="feature-meta">
+                        <li>Voice recording and music production included</li>
+                        <li>Choose morning or evening time slots</li>
+                        <li>Est. setup time: 21 days</li>
+                    </ul>
+                    <div class="feature-actions">
+                        <a class="link-underline" th:href="@{/book/RADIO_PROMOTION}">Book Now</a>
+                        <a class="link-underline" href="#pricing-radio">View Pricing</a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- 3. Social Media Campaigns -->
+            <article id="svc-social" class="feature">
+                <div class="feature-media" style="background-image:url('https://media.licdn.com/dms/image/v2/D4D12AQHNWXOfCemOBA/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1714559033929?e=2147483647&v=beta&t=-8Z8e9pEeblyhXhH4p6wVne0I1jIXWUDAUYqyGlZaAY');"></div>
+                <div class="feature-body">
+                    <h3 class="feature-title">Social Media Campaigns</h3>
+                    <p class="feature-intro">Ads for Facebook, Instagram, and TikTok with precise audience targeting.</p>
+                    <ul class="feature-meta">
+                        <li>Creative posts, videos, stories, and performance reports</li>
+                        <li>Target by age, location, and interests</li>
+                        <li>Est. setup time: 7 days</li>
+                    </ul>
+                    <div class="feature-actions">
+                        <a class="link-underline" th:href="@{/book/SOCIAL_MEDIA_CAMPAIGN}">Book Now</a>
+                        <a class="link-underline" href="#pricing-social">View Pricing</a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- 4. Newspaper Ads -->
+            <article id="svc-newspaper" class="feature reverse">
+                <div class="feature-media" style="background-image:url('https://c0.wallpaperflare.com/preview/592/556/900/adult-black-and-white-coffee-coffee-cup.jpg');"></div>
+                <div class="feature-body">
+                    <h3 class="feature-title">Newspaper Ads</h3>
+                    <p class="feature-intro">Print ads in daily and weekend newspapers for strong local credibility.</p>
+                    <ul class="feature-meta">
+                        <li>Full page, half page, or small box options</li>
+                        <li>Layout and print support included</li>
+                        <li>Est. setup time: 2 days</li>
+                    </ul>
+                    <div class="feature-actions">
+                        <a class="link-underline" th:href="@{/book/NEWSPAPER_AD}">Book Now</a>
+                        <a class="link-underline" href="#pricing-newspaper">View Pricing</a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- 5. Billboard Advertising -->
+            <article id="svc-billboard" class="feature">
+                <div class="feature-media" style="background-image:url('https://2.bp.blogspot.com/-q6evGuMKyp0/W1Zv0u91m6I/AAAAAAAC1Pw/sH1eyQdo7_s1wW9EpYo3HDNxgOehLWQjACLcBGAs/s800/better%2Bcall%2Bsaul%2Bseason%2B4%2Bmask%2Bbillboard.jpg');"></div>
+                <div class="feature-body">
+                    <h3 class="feature-title">Billboard Advertising</h3>
+                    <p class="feature-intro">Large-format outdoor ads in high-traffic city areas for long-term visibility.</p>
+                    <ul class="feature-meta">
+                        <li>Locations across Colombo, Kandy, Galle and more</li>
+                        <li>Printing and installation handled by us</li>
+                        <li>Est. setup time: 30 days</li>
+                    </ul>
+                    <div class="feature-actions">
+                        <a class="link-underline" th:href="@{/book/BILLBOARD_ADVERTISING}">Book Now</a>
+                        <a class="link-underline" href="#pricing-billboard">View Pricing</a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- 6. Digital Banners -->
+            <article id="svc-banner" class="feature reverse">
+                <div class="feature-media" style="background-image:url('https://mockupden.com/wp-content/uploads/2021/03/Editable-Free-Digital-Screen-Mockup-PSD-Template-2.jpg');"></div>
+                <div class="feature-body">
+                    <h3 class="feature-title">Digital Banners</h3>
+                    <p class="feature-intro">Display ads on websites and mobile apps with performance reporting.</p>
+                    <ul class="feature-meta">
+                        <li>Choose banner sizes and placements</li>
+                        <li>Click and view reports provided</li>
+                        <li>Est. setup time: 7 days</li>
+                    </ul>
+                    <div class="feature-actions">
+                        <a class="link-underline" th:href="@{/book/DIGITAL_BANNER}">Book Now</a>
+                        <a class="link-underline" href="#pricing-banners">View Pricing</a>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <!-- ROTATING PRICING CARDS -->
+    <section id="pricing" class="section">
+        <div class="section-head">
+            <h2>Pricing</h2>
+            <p>Transparent pricing structure. Calculate your campaign cost based on your specific requirements.</p>
+        </div>
+
+        <div class="pricing-grid-container">
+            <div class="pricing-grid" id="pricingGrid">
+                <!-- TV Advertisements Pricing Card -->
+                <div class="pricing-card active" data-service="tv" id="pricing-tv">
+                    <div class="card-badge lifetime-badge">TV</div>
+                    <div class="decorative-squares">
+                        <div class="square"></div>
+                        <div class="square"></div>
+                        <div class="square"></div>
+                    </div>
+                    <h3 class="plan-title">TV ADVERTISEMENTS</h3>
+                    <div class="price-diamond">
+                        <div class="price-main">150</div>
+                        <div class="price-unit"></div>
+                        <div class="price-currency"></div>
+                    </div>
+                    <div class="features-list">
+                        <div class="feature-item">Base Rate: 150 LKR per second</div>
+                        <div class="feature-item">Morning Slot: 1,000 LKR</div>
+                        <div class="feature-item">Evening Slot: 2,000 LKR</div>
+                        <div class="feature-item">Prime Time Slot: 3,000 LKR</div>
+
+                    </div>
+                    <div class="card-badge best-price-badge">PREMIUM</div>
+                </div>
+
+                <!-- Radio Promotions Pricing Card -->
+                <div class="pricing-card" data-service="radio" id="pricing-radio">
+                    <div class="card-badge lifetime-badge">RADIO</div>
+                    <div class="decorative-squares">
+                        <div class="square"></div>
+                        <div class="square"></div>
+                        <div class="square"></div>
+                    </div>
+                    <h3 class="plan-title">RADIO PROMOTIONS</h3>
+                    <div class="price-diamond">
+                        <div class="price-main">100</div>
+                        <div class="price-unit"></div>
+                        <div class="price-currency"></div>
+                    </div>
+                    <div class="features-list">
+                        <div class="feature-item">Base Rate: 100 LKR per second</div>
+                        <div class="feature-item">Morning Slot: 500 LKR</div>
+                        <div class="feature-item">Evening Slot: 800 LKR</div>
+                        <div class="feature-item">Prime Time Slot: 1,200 LKR</div>
+
+                    </div>
+                    <div class="card-badge best-price-badge">AFFORDABLE</div>
+                </div>
+
+                <!-- Social Media Campaigns Pricing Card -->
+                <div class="pricing-card" data-service="social" id="pricing-social">
+                    <div class="card-badge lifetime-badge">SOCIAL</div>
+                    <div class="decorative-squares">
+                        <div class="square"></div>
+                        <div class="square"></div>
+                        <div class="square"></div>
+                    </div>
+                    <h3 class="plan-title">SOCIAL MEDIA CAMPAIGNS</h3>
+                    <div class="price-diamond">
+                        <div class="price-main">2500</div>
+                        <div class="price-currency"></div>
+                    </div>
+                    <div class="features-list">
+                        <div class="feature-item">Platform Cost: 2,500 LKR each</div>
+                        <div class="feature-item">Image Post: 1,000 LKR</div>
+                        <div class="feature-item">Video Post: 2,000 LKR</div>
+                        <div class="feature-item">Story: 1,500 LKR</div>
+                        <div class="feature-item"></div>
+                    </div>
+                    <div class="card-badge best-price-badge">TRENDING</div>
+                </div>
+
+                <!-- Newspaper Ads Pricing Card -->
+                <div class="pricing-card" data-service="newspaper" id="pricing-newspaper">
+                    <div class="card-badge lifetime-badge">PRINT</div>
+                    <div class="decorative-squares">
+                        <div class="square"></div>
+                        <div class="square"></div>
+                        <div class="square"></div>
+                    </div>
+                    <h3 class="plan-title">NEWSPAPER ADS</h3>
+                    <div class="price-diamond">
+                        <div class="price-main">2000</div>
+                        <div class="price-currency"></div>
+                    </div>
+                    <div class="features-list">
+                        <div class="feature-item">Box Ad: 2,000 LKR</div>
+                        <div class="feature-item">Half Page: 4,000 LKR</div>
+                        <div class="feature-item">Full Page: 6,000 LKR</div>
+                        <div class="feature-item">Color: 1,000 LKR</div>
+                        <div class="feature-item">B&W: 500 LKR</div>
+                    </div>
+                    <div class="card-badge best-price-badge">CLASSIC</div>
+                </div>
+
+                <!-- Billboard Advertising Pricing Card -->
+                <div class="pricing-card" data-service="billboard" id="pricing-billboard">
+                    <div class="card-badge lifetime-badge">OUTDOOR</div>
+                    <div class="decorative-squares">
+                        <div class="square"></div>
+                        <div class="square"></div>
+                        <div class="square"></div>
+                    </div>
+                    <h3 class="plan-title">BILLBOARD ADVERTISING</h3>
+                    <div class="price-diamond">
+                        <div class="price-main">5000</div>
+                        <div class="price-currency"></div>
+                    </div>
+                    <div class="features-list">
+                        <div class="feature-item">Small : 5,000 LKR</div>
+                        <div class="feature-item">Medium : 7,500 LKR</div>
+                        <div class="feature-item">Large : 10,000 LKR</div>
+                        <div class="feature-item">Island wide locations up to 2000</div>
+                        <div class="feature-item"></div>
+                    </div>
+                    <div class="card-badge best-price-badge">IMPACT</div>
+                </div>
+
+                <!-- Digital Banners Pricing Card -->
+                <div class="pricing-card" data-service="banners" id="pricing-banners">
+                    <div class="card-badge lifetime-badge">DIGITAL</div>
+                    <div class="decorative-squares">
+                        <div class="square"></div>
+                        <div class="square"></div>
+                        <div class="square"></div>
+            </div>
+                    <h3 class="plan-title">DIGITAL BANNERS</h3>
+                    <div class="price-diamond">
+                        <div class="price-main">1500</div>
+                        <div class="price-currency"></div>
+            </div>
+                    <div class="features-list">
+                        <div class="feature-item">Small : 1,500 LKR</div>
+                        <div class="feature-item">Medium : 2,500 LKR</div>
+                        <div class="feature-item">Large : 4,000 LKR</div>
+                        <div class="feature-item">Tracking On: 1,000 LKR</div>
+                        <div class="feature-item"></div>
+            </div>
+                    <div class="card-badge best-price-badge">SMART</div>
+            </div>
+            </div>
+
+            </div>
+
+    </section>
+
+    <script>
+        // Pricing Carousel with Linked List Implementation
+        class PricingNode {
+            constructor(service, element, index) {
+                this.service = service;
+                this.element = element;
+                this.index = index;
+                this.next = null;
+                this.prev = null;
+            }
+        }
+
+        class PricingCarousel {
+            constructor() {
+                this.cards = document.querySelectorAll('.pricing-card');
+                this.head = null;
+                this.current = null;
+                this.isAutoRotating = true;
+                this.rotationInterval = null;
+                this.rotationSpeed = 3000; // 3 seconds
+                this.currentIndex = 0;
+                this.animationStyle = 'carousel'; // 'carousel' style from image
+
+                this.init();
+            }
+
+            init() {
+                this.createLinkedList();
+                this.setupEventListeners();
+                this.startAutoRotation();
+                this.setupSlidingStacks();
+            }
+
+            createLinkedList() {
+                // Create linked list from pricing cards
+                for (let i = 0; i < this.cards.length; i++) {
+                    const node = new PricingNode(this.cards[i].dataset.service, this.cards[i], i);
+
+                    if (!this.head) {
+                        this.head = node;
+                        this.current = node;
+                    } else {
+                        let temp = this.head;
+                        while (temp.next) {
+                            temp = temp.next;
+                        }
+                        temp.next = node;
+                        node.prev = temp;
+                    }
+                }
+
+                // Make it circular
+                let temp = this.head;
+                while (temp.next) {
+                    temp = temp.next;
+                }
+                temp.next = this.head;
+                this.head.prev = temp;
+            }
+
+            setupSlidingStacks() {
+                // Set up overlapping effect with center card in front and side cards half-visible behind
+                this.cards.forEach((card, index) => {
+                    if (index === 0) {
+                        // Center card (current) - in front, fully visible
+                        card.style.zIndex = this.cards.length;
+                        card.style.transform = 'translateX(0) scale(1)';
+                        card.style.opacity = '1';
+                        card.style.filter = 'blur(0px)';
+                    } else if (index === 1) {
+                        // Right card (next) - in the right space
+                        card.style.zIndex = this.cards.length - 1;
+                        card.style.transform = 'translateX(300px) scale(1)';
+                        card.style.opacity = '0.8';
+                        card.style.filter = 'blur(0px)';
+                    } else if (index === 2) {
+                        // Left card (previous) - in the left space
+                        card.style.zIndex = this.cards.length - 2;
+                        card.style.transform = 'translateX(-300px) scale(1)';
+                        card.style.opacity = '0.8';
+                        card.style.filter = 'blur(0px)';
+                    } else {
+                        // Hidden cards
+                        card.style.zIndex = 0;
+                        card.style.transform = 'translateX(0) scale(0.5)';
+                        card.style.opacity = '0';
+                        card.style.filter = 'blur(5px)';
+                    }
+                });
+            }
+
+            setupEventListeners() {
+                // Card click to pause/resume
+                this.cards.forEach(card => {
+                    card.addEventListener('click', () => {
+                        this.toggleAutoRotation();
+                    });
+                });
+
+                // Pause on hover
+                const carousel = document.querySelector('.pricing-carousel');
+                carousel.addEventListener('mouseenter', () => this.pauseAutoRotation());
+                carousel.addEventListener('mouseleave', () => {
+                    if (this.isAutoRotating) this.startAutoRotation();
+                });
+
+                // Double click to switch animation style (disabled for carousel style)
+                // carousel.addEventListener('dblclick', () => {
+                //     this.switchAnimationStyle();
+                // });
+            }
+
+            switchAnimationStyle() {
+                if (this.animationStyle === 'horizontal') {
+                    this.animationStyle = 'vertical';
+                } else if (this.animationStyle === 'vertical') {
+                    this.animationStyle = '3d';
+                } else {
+                    this.animationStyle = 'horizontal';
+                }
+                this.setupSlidingStacks();
+                console.log(`Animation style switched to: ${this.animationStyle}`);
+            }
+
+            nextCard() {
+                this.current = this.current.next;
+                this.currentIndex = (this.currentIndex + 1) % this.cards.length;
+                this.animateSlidingStacks();
+            }
+
+            animateSlidingStacks() {
+                // Animate overlapping effect with center card in front and side cards half-visible behind
+                this.cards.forEach((card, index) => {
+                    const relativeIndex = (index - this.currentIndex + this.cards.length) % this.cards.length;
+
+                    if (relativeIndex === 0) {
+                        // Center card (current) - in front, fully visible
+                        card.style.zIndex = this.cards.length;
+                        card.style.transform = 'translateX(0) scale(1)';
+                        card.style.opacity = '1';
+                        card.style.filter = 'blur(0px)';
+                        card.classList.add('active');
+                    } else if (relativeIndex === 1) {
+                        // Right card (next) - in the right space
+                        card.style.zIndex = this.cards.length - 1;
+                        card.style.transform = 'translateX(300px) scale(1)';
+                        card.style.opacity = '0.8';
+                        card.style.filter = 'blur(0px)';
+                        card.classList.remove('active');
+                    } else if (relativeIndex === this.cards.length - 1) {
+                        // Left card (previous) - in the left space
+                        card.style.zIndex = this.cards.length - 2;
+                        card.style.transform = 'translateX(-300px) scale(1)';
+                        card.style.opacity = '0.8';
+                        card.style.filter = 'blur(0px)';
+                        card.classList.remove('active');
+                    } else {
+                        // Hidden cards - not visible
+                        card.style.zIndex = 0;
+                        card.style.transform = 'translateX(0) scale(0.5)';
+                        card.style.opacity = '0';
+                        card.style.filter = 'blur(5px)';
+                        card.classList.remove('active');
+                    }
+                });
+            }
+
+            startAutoRotation() {
+                if (this.rotationInterval) clearInterval(this.rotationInterval);
+                this.isAutoRotating = true;
+
+                this.rotationInterval = setInterval(() => {
+                    this.nextCard();
+                }, this.rotationSpeed);
+            }
+
+            pauseAutoRotation() {
+                if (this.rotationInterval) {
+                    clearInterval(this.rotationInterval);
+                    this.rotationInterval = null;
+                }
+                this.isAutoRotating = false;
+            }
+
+            toggleAutoRotation() {
+                if (this.isAutoRotating) {
+                    this.pauseAutoRotation();
+                } else {
+                    this.startAutoRotation();
+                }
+            }
+        }
+
+        // Simple grid layout - no animation needed
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Pricing grid loaded - all 6 cards visible');
+        });
+
+        // Book service function
+        function bookService(serviceType) {
+            window.location.href = `/book/${serviceType}`;
+        }
+    </script>
+
+</th:block>
+</html>
+

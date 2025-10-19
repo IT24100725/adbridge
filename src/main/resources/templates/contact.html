@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::content})}">
+<th:block th:fragment="content">
+
+    <!-- CONTACT PAGE - PRECISE DESIGN SPECIFICATION -->
+    <main role="main" class="contact-page">
+        <div class="contact-background"></div>
+        
+        <div class="contact-container">
+            <!-- Left Column - Contact Form (45%) -->
+            <div class="contact-form-column">
+                <form class="contact-form" id="contactForm" method="post" th:action="@{/contact}" onsubmit="return handleFormSubmit()">
+                    <!-- Request Type Dropdown -->
+                    <div class="form-group">
+                        <label for="requestType" class="visually-hidden">Request Type</label>
+                        <select id="requestType" onchange="toggleFields()">
+                            <option value="">Select Request Type</option>
+                            <option value="CREATE_NEW_CLIENT">Create New Client</option>
+                            <option value="CANCEL_BOOKING">Cancel Booking</option>
+                            <option value="REJECTED_BOOKING_REQUEST">Request for Rejected Booking</option>
+                            <option value="GENERAL_INQUIRY">Other</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Your Information (Always visible) -->
+                    <div class="form-group">
+                        <label for="contactPerson" class="visually-hidden">Your Name</label>
+                        <input type="text" id="contactPerson" name="contactPerson" 
+                               th:value="${user != null ? user.fullName : ''}" 
+                               placeholder="Your Name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email" class="visually-hidden">Your Email</label>
+                        <input type="email" id="email" name="email" 
+                               th:value="${user != null ? user.email : ''}" 
+                               placeholder="Your Email" required>
+                    </div>
+                    
+                    <!-- Dynamic Fields Based on Request Type -->
+                    
+                    <!-- Create New Client Fields -->
+                    <div id="createClientFields" class="dynamic-section" style="display: none;">
+                        <h3>New Client Details</h3>
+                        <div class="form-group">
+                            <label for="clientNameField" class="visually-hidden">Client Full Name</label>
+                            <input type="text" id="clientNameField" name="clientName" placeholder="Client Full Name">
+                        </div>
+                        <div class="form-group">
+                            <label for="clientEmailField" class="visually-hidden">Client Email</label>
+                            <input type="email" id="clientEmailField" name="clientEmail" placeholder="Client Email">
+                        </div>
+                        <div class="form-group">
+                            <label for="clientCompanyField" class="visually-hidden">Client Company</label>
+                            <input type="text" id="clientCompanyField" name="clientCompany" placeholder="Client Company Name">
+                        </div>
+                        <div class="form-group">
+                            <label for="clientPhoneField" class="visually-hidden">Client Phone</label>
+                            <input type="tel" id="clientPhoneField" name="clientPhone" placeholder="Client Phone Number">
+                        </div>
+                        <div class="form-group">
+                            <label for="clientNotesField" class="visually-hidden">Additional Notes</label>
+                            <textarea id="clientNotesField" name="requestReason" placeholder="Additional Notes (Optional)"></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Cancel Booking Fields -->
+                    <div id="cancelBookingFields" class="dynamic-section" style="display: none;">
+                        <h3>Booking Details</h3>
+                        <div class="form-group">
+                            <label for="bookingIdField" class="visually-hidden">Booking ID</label>
+                            <input type="text" id="bookingIdField" name="bookingId" placeholder="Your Booking ID">
+                        </div>
+                        <div class="form-group">
+                            <label for="cancelReasonField" class="visually-hidden">Reason for Cancellation</label>
+                            <textarea id="cancelReasonField" name="requestReason" placeholder="Reason for Cancellation"></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Request for Rejected Booking Fields -->
+                    <div id="rejectedBookingFields" class="dynamic-section" style="display: none;">
+                        <h3>Booking Details</h3>
+                        <div class="form-group">
+                            <label for="rejectedBookingIdField" class="visually-hidden">Booking ID</label>
+                            <input type="text" id="rejectedBookingIdField" name="bookingId" placeholder="Your Booking ID">
+                        </div>
+                        <div class="form-group">
+                            <label for="rejectionReasonField" class="visually-hidden">Reason for Request</label>
+                            <textarea id="rejectionReasonField" name="requestReason" placeholder="Reason for Re-approval Request"></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Other/General Inquiry Fields -->
+                    <div id="generalInquiryFields" class="dynamic-section" style="display: none;">
+                        <h3>Message Details</h3>
+                        <div class="form-group">
+                            <label for="phone" class="visually-hidden">Your Phone</label>
+                            <input type="tel" id="phone" name="phone" placeholder="Your Phone Number (Optional)">
+                        </div>
+                        <div class="form-group">
+                            <label for="subject" class="visually-hidden">Subject</label>
+                            <input type="text" id="subject" name="subject" placeholder="Subject">
+                        </div>
+                    <div class="form-group">
+                            <label for="message" class="visually-hidden">Message</label>
+                            <textarea id="message" name="message" placeholder="Your Message"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn-send">
+                            SEND
+                        </button>
+                    </div>
+                    
+                    <!-- Hidden fields for backend compatibility -->
+                    <input type="hidden" id="companyName" name="companyName" value="Contact Form">
+                    <input type="hidden" id="phoneHidden" name="phone" value="">
+                    <input type="hidden" id="requestTypeHidden" name="requestType" value="">
+                    <textarea id="message" name="message" style="display: none;"></textarea>
+                </form>
+            </div>
+            
+            <!-- Right Column - Hero Visual (55%) -->
+            <div class="contact-hero-column">
+                <div class="hero-blob">
+                    <svg viewBox="0 0 200 200" class="blob-svg">
+                        <path d="M40,50 Q60,20 90,40 T140,50 Q160,80 140,110 T90,130 Q60,150 40,120 Q20,90 40,50 Z" 
+                              fill="none" 
+                              stroke="rgba(255,255,255,0.06)" 
+                              stroke-width="1.5"/>
+                    </svg>
+                </div>
+                
+                <div class="hero-content">
+                    <h1 class="hero-heading">
+                        <span class="heading-line">Contact</span>
+                        <span class="heading-line">Us</span>
+                    </h1>
+                    
+                    <p class="hero-description">
+                        It is very important for us to keep in touch with you, so we are always ready to answer any question that interests you. Shoot!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function toggleFields() {
+            const requestType = document.getElementById('requestType').value;
+            
+            // Hide all dynamic sections
+            document.getElementById('createClientFields').style.display = 'none';
+            document.getElementById('cancelBookingFields').style.display = 'none';
+            document.getElementById('rejectedBookingFields').style.display = 'none';
+            document.getElementById('generalInquiryFields').style.display = 'none';
+            
+            // Show relevant section and update hidden fields
+            switch(requestType) {
+                case 'CREATE_NEW_CLIENT':
+                    document.getElementById('createClientFields').style.display = 'block';
+                    document.getElementById('companyName').value = 'CREATE_NEW_CLIENT_REQUEST';
+                    document.getElementById('requestTypeHidden').value = 'CREATE_NEW_CLIENT';
+                    document.getElementById('phoneHidden').value = '';
+                    break;
+                    
+                case 'CANCEL_BOOKING':
+                    document.getElementById('cancelBookingFields').style.display = 'block';
+                    document.getElementById('companyName').value = 'CANCEL_BOOKING_REQUEST';
+                    document.getElementById('requestTypeHidden').value = 'CANCEL_BOOKING';
+                    document.getElementById('phoneHidden').value = '';
+                    break;
+                    
+                case 'REJECTED_BOOKING_REQUEST':
+                    document.getElementById('rejectedBookingFields').style.display = 'block';
+                    document.getElementById('companyName').value = 'REJECTED_BOOKING_REQUEST';
+                    document.getElementById('requestTypeHidden').value = 'REJECTED_BOOKING_REQUEST';
+                    document.getElementById('phoneHidden').value = '';
+                    break;
+                    
+                case 'GENERAL_INQUIRY':
+                    document.getElementById('generalInquiryFields').style.display = 'block';
+                    document.getElementById('companyName').value = 'GENERAL_INQUIRY';
+                    document.getElementById('requestTypeHidden').value = 'GENERAL_INQUIRY';
+                    break;
+            }
+            
+            // Update message field immediately when request type changes
+            updateMessageField();
+        }
+        
+        // Ensure message field exists for all request types
+        function ensureMessageField() {
+            return document.getElementById('message'); // Just return the existing field
+        }
+        
+        // Update message field when request type changes
+        function updateMessageField() {
+            const requestType = document.getElementById('requestType').value;
+            const messageField = ensureMessageField();
+            
+            console.log('Updating message field for type:', requestType);
+            
+            if (requestType === 'CREATE_NEW_CLIENT') {
+                const clientName = document.getElementById('clientName').value || '';
+                const clientEmail = document.getElementById('clientEmail').value || '';
+                const clientCompany = document.getElementById('clientCompany').value || '';
+                const clientPhone = document.getElementById('clientPhone').value || '';
+                const clientNotes = document.getElementById('clientNotes').value || '';
+                
+                messageField.value = `NEW CLIENT REQUEST:
+Client Name: ${clientName}
+Client Email: ${clientEmail}
+Client Company: ${clientCompany}
+Client Phone: ${clientPhone}
+Additional Notes: ${clientNotes}`;
+                
+            } else if (requestType === 'CANCEL_BOOKING') {
+                const bookingId = document.getElementById('bookingId').value || '';
+                const cancelReason = document.getElementById('cancelReason').value || '';
+                
+                messageField.value = `BOOKING CANCELLATION REQUEST:
+Booking ID: ${bookingId}
+Reason: ${cancelReason}`;
+                
+            } else if (requestType === 'REJECTED_BOOKING_REQUEST') {
+                const rejectedBookingId = document.getElementById('rejectedBookingId').value || '';
+                const rejectionReason = document.getElementById('rejectionReason').value || '';
+                
+                messageField.value = `REJECTED BOOKING RE-APPROVAL REQUEST:
+Booking ID: ${rejectedBookingId}
+Reason: ${rejectionReason}`;
+                
+            } else if (requestType === 'GENERAL_INQUIRY') {
+                const subject = document.getElementById('subject').value || '';
+                const phone = document.getElementById('phone') ? document.getElementById('phone').value || '' : '';
+                const message = document.getElementById('message').value || '';
+                
+                if (phone) {
+                    document.getElementById('phoneHidden').value = phone;
+                }
+                messageField.value = `GENERAL INQUIRY:
+Subject: ${subject}
+Phone: ${phone}
+Message: ${message}`;
+            }
+            
+            console.log('Message field value:', messageField.value);
+        }
+        
+        // Simple approach - no complex event listeners
+        function handleFormSubmit() {
+            updateMessageField();
+            return true; // Allow form submission
+        }
+    </script>
+
+</th:block>
+</html>

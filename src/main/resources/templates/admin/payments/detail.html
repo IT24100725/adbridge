@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head">
+        <h1 class="page-title" th:text="${pageHeading}">Payment Details</h1>
+        <div>
+            <a class="btn" th:href="@{/admin/payments}">← Back to Payments</a>
+        </div>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <!-- Payment Information -->
+    <div class="card" style="margin-bottom: 20px;">
+        <h3>Payment Information</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+            <div>
+                <strong>Payment ID:</strong><br>
+                <span th:text="${payment.paymentId}">PM-0001</span>
+                <span th:if="${payment.deleted == true}" class="badge danger" style="margin-left: 10px;">DELETED</span>
+            </div>
+            <div>
+                <strong>Booking ID:</strong><br>
+                <a th:href="@{'/admin/clients/detail?search=' + ${payment.bookingId}}" th:text="${payment.bookingId}">BK-0001</a>
+            </div>
+            <div>
+                <strong>Payment Method:</strong><br>
+                <span th:text="${payment.paymentMethod}">CARD</span>
+            </div>
+            <div>
+                <strong>Amount:</strong><br>
+                <span th:text="${payment.amount != null ? #numbers.formatInteger(payment.amount, 0, 'COMMA') + ' ' + payment.currency : 'N/A'}">10,000 LKR</span>
+            </div>
+            <div>
+                <strong>Status:</strong><br>
+                <span class="badge" 
+                      th:class="${payment.paymentStatus.name() == 'COMPLETED'} ? 'badge success' : 
+                               (${payment.paymentStatus.name() == 'FAILED' or payment.paymentStatus.name() == 'CANCELLED'} ? 'badge danger' : 
+                               (${payment.paymentStatus.name() == 'REFUNDED'} ? 'badge warning' : 'badge'))"
+                      th:text="${payment.paymentStatus}">PENDING</span>
+            </div>
+            <div>
+                <strong>Created:</strong><br>
+                <span th:text="${#temporals.format(payment.createdAt, 'yyyy-MM-dd HH:mm:ss')}">2025-01-01 10:00:00</span>
+            </div>
+            <div th:if="${payment.updatedAt != null}">
+                <strong>Last Updated:</strong><br>
+                <span th:text="${#temporals.format(payment.updatedAt, 'yyyy-MM-dd HH:mm:ss')}">2025-01-01 10:00:00</span>
+            </div>
+            <div th:if="${payment.externalTransactionId != null}">
+                <strong>External Transaction ID:</strong><br>
+                <span th:text="${payment.externalTransactionId}">TXN-123456</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Information -->
+    <div th:if="${booking != null}" class="card" style="margin-bottom: 20px;">
+        <h3>Related Booking</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+            <div>
+                <strong>Client Name:</strong><br>
+                <span th:text="${booking.fullName}">John Doe</span>
+            </div>
+            <div>
+                <strong>Company:</strong><br>
+                <span th:text="${booking.companyName ?: 'N/A'}">ABC Company</span>
+            </div>
+            <div>
+                <strong>Email:</strong><br>
+                <span th:text="${booking.email}">john@example.com</span>
+            </div>
+            <div>
+                <strong>Contact:</strong><br>
+                <span th:text="${booking.contactNumber}">+94123456789</span>
+            </div>
+            <div>
+                <strong>Service Type:</strong><br>
+                <span th:text="${booking.serviceType}">TV_ADVERTISEMENT</span>
+            </div>
+            <div>
+                <strong>Total Amount:</strong><br>
+                <span th:text="${booking.totalAmount != null ? #numbers.formatInteger(booking.totalAmount, 0, 'COMMA') + ' LKR' : 'N/A'}">10,000 LKR</span>
+            </div>
+        </div>
+        
+        <!-- Amount Mismatch Warning -->
+        <div th:if="${booking.totalAmount != null and payment.amount != null and booking.totalAmount != payment.amount}" 
+             class="alert alert-warning" style="margin-top: 15px;">
+            <strong>Amount Mismatch:</strong> 
+            Booking Total: <span th:text="${#numbers.formatInteger(booking.totalAmount, 0, 'COMMA')}">0</span> LKR, 
+            Payment Amount: <span th:text="${#numbers.formatInteger(payment.amount, 0, 'COMMA')}">0</span> LKR
+        </div>
+    </div>
+
+    <!-- Payment Method Details -->
+    <div class="card" style="margin-bottom: 20px;">
+        <h3>Payment Method Details</h3>
+        
+        <!-- Card Payment Details -->
+        <div th:if="${payment.paymentMethod.name() == 'CARD'}">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                <div th:if="${payment.cardholderName != null}">
+                    <strong>Cardholder Name:</strong><br>
+                    <span th:text="${payment.cardholderName}">John Doe</span>
+                </div>
+                <div th:if="${payment.cardNumber != null}">
+                    <strong>Card Number:</strong><br>
+                    <span th:text="${payment.cardNumber}">****1234</span>
+                </div>
+                <div th:if="${payment.expiryDate != null}">
+                    <strong>Expiry Date:</strong><br>
+                    <span th:text="${payment.expiryDate}">12/25</span>
+                </div>
+            </div>
+            <div th:if="${payment.billingAddress != null}" style="margin-top: 15px;">
+                <strong>Billing Address:</strong><br>
+                <pre th:text="${payment.billingAddress}">123 Main St, City</pre>
+            </div>
+        </div>
+        
+        <!-- Bank Transfer Details -->
+        <div th:if="${payment.paymentMethod.name() == 'BANK_TRANSFER'}">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                <div th:if="${payment.bankName != null}">
+                    <strong>Bank Name:</strong><br>
+                    <span th:text="${payment.bankName}">Bank of Ceylon</span>
+                </div>
+                <div th:if="${payment.accountNumber != null}">
+                    <strong>Account Number:</strong><br>
+                    <span th:text="${payment.accountNumber}">123456789</span>
+                </div>
+                <div th:if="${payment.transactionReference != null}">
+                    <strong>Transaction Reference:</strong><br>
+                    <span th:text="${payment.transactionReference}">REF123456</span>
+                </div>
+            </div>
+            <!-- TODO: Show uploaded payment slips from Documents module -->
+            <div style="margin-top: 15px;">
+                <strong>Payment Slips:</strong><br>
+                <em style="color: #666;">Payment slip integration with Documents module - Coming Soon</em>
+            </div>
+        </div>
+        
+        <!-- Cash Payment Details -->
+        <div th:if="${payment.paymentMethod.name() == 'CASH'}">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                <div th:if="${payment.preferredDate != null}">
+                    <strong>Preferred Date:</strong><br>
+                    <span th:text="${payment.preferredDate}">2025-01-15</span>
+                </div>
+                <div th:if="${payment.preferredTime != null}">
+                    <strong>Preferred Time:</strong><br>
+                    <span th:text="${payment.preferredTime}">10:00 AM</span>
+                </div>
+                <div th:if="${payment.paymentLocation != null}">
+                    <strong>Payment Location:</strong><br>
+                    <span th:text="${payment.paymentLocation}">Main Office</span>
+                </div>
+                <div th:if="${payment.contactNumber != null}">
+                    <strong>Contact Number:</strong><br>
+                    <span th:text="${payment.contactNumber}">+94123456789</span>
+                </div>
+            </div>
+            <div th:if="${payment.specialInstructions != null}" style="margin-top: 15px;">
+                <strong>Special Instructions:</strong><br>
+                <pre th:text="${payment.specialInstructions}">Please call before visit</pre>
+            </div>
+        </div>
+        
+        <!-- Payment Notes -->
+        <div th:if="${payment.paymentNotes != null}" style="margin-top: 15px;">
+            <strong>Payment Notes:</strong><br>
+            <pre th:text="${payment.paymentNotes}">Additional payment notes</pre>
+        </div>
+    </div>
+
+    <!-- External Gateway Information -->
+    <div th:if="${payment.externalTransactionId != null or payment.externalStatus != null or payment.externalMessage != null}" 
+         class="card" style="margin-bottom: 20px;">
+        <h3>External Gateway Information</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+            <div th:if="${payment.externalTransactionId != null}">
+                <strong>Transaction ID:</strong><br>
+                <span th:text="${payment.externalTransactionId}">TXN-123456</span>
+            </div>
+            <div th:if="${payment.externalStatus != null}">
+                <strong>Gateway Status:</strong><br>
+                <span th:text="${payment.externalStatus}">SUCCESS</span>
+            </div>
+        </div>
+        <div th:if="${payment.externalMessage != null}" style="margin-top: 15px;">
+            <strong>Gateway Message:</strong><br>
+            <pre th:text="${payment.externalMessage}">Transaction completed successfully</pre>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="card" style="margin-bottom: 20px;" th:if="${payment.deleted != true}">
+        <h3>Actions</h3>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <!-- Confirm button -->
+            <form th:if="${(adminRole?.name() == 'FINANCE' or adminRole?.name() == 'DIRECTOR' or adminRole?.name() == 'SUPER_ADMIN') and 
+                          payment.paymentStatus.name() != 'COMPLETED' and payment.paymentStatus.name() != 'CANCELLED' and 
+                          payment.paymentStatus.name() != 'REFUNDED'}" 
+                  th:action="@{'/admin/payments/' + ${payment.id} + '/confirm'}" method="post" style="display:inline;">
+                <input type="hidden" name="reason" value="Confirmed via detail page">
+                <button class="btn success" type="submit">Confirm Payment</button>
+            </form>
+            
+            <!-- Cancel button -->
+            <button th:if="${(adminRole?.name() == 'FINANCE' or adminRole?.name() == 'DIRECTOR' or adminRole?.name() == 'SUPER_ADMIN') and 
+                            payment.paymentStatus.name() != 'CANCELLED' and payment.paymentStatus.name() != 'REFUNDED'}" 
+                    class="btn danger" onclick="showCancelModal()">Cancel Payment</button>
+            
+            <!-- Refund button -->
+            <button th:if="${(adminRole?.name() == 'FINANCE' or adminRole?.name() == 'DIRECTOR' or adminRole?.name() == 'SUPER_ADMIN') and 
+                            payment.paymentStatus.name() == 'COMPLETED'}" 
+                    class="btn warning" onclick="showRefundModal()">Refund Payment</button>
+            
+            <!-- Delete button -->
+            <button th:if="${(adminRole?.name() == 'FINANCE' or adminRole?.name() == 'SUPER_ADMIN')}" 
+                    class="btn danger" onclick="showDeleteModal()">Delete Payment</button>
+        </div>
+    </div>
+
+    <!-- Audit History -->
+    <div class="card" style="margin-bottom: 20px;">
+        <h3>Audit History</h3>
+        <div th:if="${auditHistory != null and !#lists.isEmpty(auditHistory)}">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Action</th>
+                    <th>Performed By</th>
+                    <th>Status Change</th>
+                    <th>Reason</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="audit : ${auditHistory}">
+                    <td th:text="${#temporals.format(audit.performedAt, 'yyyy-MM-dd HH:mm:ss')}">2025-01-01 10:00:00</td>
+                    <td>
+                        <span class="badge" 
+                              th:class="${audit.action == 'CONFIRM'} ? 'badge success' : 
+                                       (${audit.action == 'CANCEL' or audit.action == 'DELETE'} ? 'badge danger' : 
+                                       (${audit.action == 'REFUND'} ? 'badge warning' : 'badge'))"
+                              th:text="${audit.action}">CONFIRM</span>
+                    </td>
+                    <td th:text="${audit.performedBy}">admin</td>
+                    <td>
+                        <span th:if="${audit.oldStatus != null and audit.newStatus != null}" 
+                              th:text="${audit.oldStatus + ' → ' + audit.newStatus}">PENDING → COMPLETED</span>
+                        <span th:unless="${audit.oldStatus != null and audit.newStatus != null}">-</span>
+                    </td>
+                    <td th:text="${audit.reason ?: '-'}">Payment confirmed</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div th:if="${auditHistory == null or #lists.isEmpty(auditHistory)}" class="muted center" style="padding: 20px;">
+            No audit history available for this payment.
+        </div>
+    </div>
+
+    <!-- Cancel Payment Modal -->
+    <div id="cancelModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>Cancel Payment</h3>
+            <p>Are you sure you want to cancel this payment?</p>
+            <form th:action="@{'/admin/payments/' + ${payment.id} + '/cancel'}" method="post">
+                <div style="margin-bottom: 15px;">
+                    <label for="cancelReason">Reason for cancellation (required):</label>
+                    <textarea id="cancelReason" name="reason" required style="width: 100%; height: 60px;"></textarea>
+                </div>
+                <div style="text-align: right;">
+                    <button type="button" class="btn" onclick="hideCancelModal()">Cancel</button>
+                    <button type="submit" class="btn danger">Confirm Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Refund Payment Modal -->
+    <div id="refundModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>Refund Payment</h3>
+            <p>Are you sure you want to refund this payment?</p>
+            <form th:action="@{'/admin/payments/' + ${payment.id} + '/refund'}" method="post">
+                <div style="margin-bottom: 15px;">
+                    <label for="refundReason">Reason for refund (required):</label>
+                    <textarea id="refundReason" name="reason" required style="width: 100%; height: 60px;"></textarea>
+                </div>
+                <div style="text-align: right;">
+                    <button type="button" class="btn" onclick="hideRefundModal()">Cancel</button>
+                    <button type="submit" class="btn warning">Confirm Refund</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Payment Modal -->
+    <div id="deleteModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>Delete Payment</h3>
+            <p>Are you sure you want to delete this payment?</p>
+            <p style="color: #666; font-size: 0.9em;">This will soft-delete the payment record.</p>
+            <form th:action="@{'/admin/payments/' + ${payment.id} + '/delete'}" method="post">
+                <div style="margin-bottom: 15px;">
+                    <label for="deleteReason">Reason for deletion (required):</label>
+                    <textarea id="deleteReason" name="reason" required style="width: 100%; height: 60px;"></textarea>
+                </div>
+                <div style="text-align: right;">
+                    <button type="button" class="btn" onclick="hideDeleteModal()">Cancel</button>
+                    <button type="submit" class="btn danger">Confirm Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 500px;
+            width: 90%;
+        }
+        .badge.success { background-color: #28a745; color: white; }
+        .badge.danger { background-color: #dc3545; color: white; }
+        .badge.warning { background-color: #ffc107; color: black; }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+
+    <script>
+        function showCancelModal() {
+            document.getElementById('cancelModal').style.display = 'block';
+        }
+        
+        function hideCancelModal() {
+            document.getElementById('cancelModal').style.display = 'none';
+            document.getElementById('cancelReason').value = '';
+        }
+        
+        function showRefundModal() {
+            document.getElementById('refundModal').style.display = 'block';
+        }
+        
+        function hideRefundModal() {
+            document.getElementById('refundModal').style.display = 'none';
+            document.getElementById('refundReason').value = '';
+        }
+        
+        function showDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'block';
+        }
+        
+        function hideDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+            document.getElementById('deleteReason').value = '';
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const modals = ['cancelModal', 'refundModal', 'deleteModal'];
+            modals.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+    </script>
+
+    <footer class="admin-footer-sticky">
+        © 2025 AdBridgeLanka · Admin
+    </footer>
+</section>
+</html>
+
+
+
+
+

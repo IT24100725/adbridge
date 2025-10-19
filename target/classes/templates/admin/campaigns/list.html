@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head" style="display:flex;justify-content:space-between;gap:1rem;align-items:center;">
+        <h1 class="page-title" th:text="${pageHeading}">CAMPAIGNS</h1>
+    </div>
+
+    <div class="card">
+        <!-- Modern Search Bar -->
+        <div class="modern-search-bar">
+            <form th:action="@{/admin/campaigns}" method="get" class="search-form">
+                <div class="search-input-container">
+                    <input type="text" 
+                           name="search" 
+                           placeholder="Search campaigns..." 
+                           th:value="${search}"
+                           class="pill-search-input"
+                           id="searchInput">
+                    <button type="button" class="search-clear-btn" onclick="clearSearch()" th:if="${search != null and !search.trim().isEmpty()}">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                
+                <div class="sort-dropdown-container">
+                    <select name="sortBy" class="sort-dropdown" onchange="this.form.submit()">
+                        <option value="">All Status</option>
+                        <option value="REJECTED" th:selected="${sortBy == 'REJECTED'}">REJECTED</option>
+                        <option value="APPROVED" th:selected="${sortBy == 'APPROVED'}">APPROVED</option>
+                        <option value="PENDING" th:selected="${sortBy == 'PENDING'}">PENDING</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="search-submit-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                </button>
+            </form>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;gap:.5rem;margin-bottom:.6rem;">
+            <!-- PDF Download Buttons for Marketing Planner -->
+            <div th:if="${adminRole != null and (adminRole.name()=='MARKETING' or adminRole.name()=='SUPER_ADMIN')}" style="display:flex;gap:.5rem;margin-right:1rem;">
+                <a th:href="@{/admin/campaigns/pdf/approved}" class="btn success" style="background-color:#27ae60;color:white;">
+                    📄 Download Approved Campaigns PDF
+                </a>
+                <a th:href="@{/admin/campaigns/pdf/rejected}" class="btn danger" style="background-color:#e74c3c;color:white;">
+                    📄 Download Rejected Campaigns PDF
+                </a>
+            </div>
+            <form th:action="@{/admin/campaigns}" method="get">
+                <input type="hidden" name="filter" value="expired">
+                <button class="btn" type="submit">Show Expired</button>
+            </form>
+            <a class="btn" th:href="@{/admin/campaigns}">Clear</a>
+        </div>
+        <table class="table" style="table-layout: fixed; width: 100%;">
+            <thead>
+            <tr>
+                <th style="width: 15%;">Booking ID</th>
+                <th style="width: 20%;">Client</th>
+                <th style="width: 15%;">Service</th>
+                <th style="width: 8%;">Total (LKR)</th>
+                <th style="width: 8%;">Status</th>
+                <th style="width: 10%;">Booked On</th>
+                <th style="width: 10%;">Task</th>
+                <th style="width: 14%;">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="c : ${campaigns}">
+                <td th:text="${c.bookingId}" style="white-space: normal; word-break: break-all;">AB-0001</td>
+                <td>
+                    <div th:text="${c.fullName}">Client Name</div>
+                    <div class="muted" th:text="${c.companyName}">Company</div>
+                </td>
+                <td th:text="${c.serviceType}">TV_ADVERTISEMENT</td>
+                <td th:text="${c.totalAmount} ?: '-'">-</td>
+                <td><span th:text="${c.campaignStatus} ?: 'PENDING'" class="badge">PENDING</span></td>
+                <td>
+                    <span th:text="${c.lastModifiedAt != null ? c.lastModifiedAt.toLocalDate() : '-'}">-</span>
+                    <span th:if="${c.lastModifiedAt != null and c.lastModifiedAt.toLocalDate().isBefore(T(java.time.LocalDate).now().minusDays(30))}"
+                          class="badge red">EXPIRED</span>
+                </td>
+                <td>
+                    <!-- Create Task button: only for approved campaigns -->
+                    <span th:if="${adminRole != null and (adminRole.name()=='MARKETING' or adminRole.name()=='SUPER_ADMIN') and c.campaignStatus == 'APPROVED'}">
+                        <a th:href="@{'/admin/tasks/new/' + ${c.id}}" class="btn xs">Create Task</a>
+                    </span>
+                </td>
+                <td>
+                    <!-- Marketing Planner: View Campaign button (for all campaigns) -->
+                    <span th:if="${adminRole != null and (adminRole.name()=='MARKETING' or adminRole.name()=='SUPER_ADMIN')}" >
+                        <a th:href="@{'/admin/campaigns/' + ${c.id}}" class="btn xs">View</a>
+                    </span>
+
+                    <!-- Marketing Planner: Create Campaign button (only for Finance approved payments) -->
+                    <span th:if="${adminRole != null and (adminRole.name()=='MARKETING' or adminRole.name()=='SUPER_ADMIN') and
+                                c.paymentStatus == 'PENDING' and c.campaignStatus == 'PENDING' and c.currentVersion == null}">
+                        <form th:action="@{'/admin/campaigns/' + ${c.id} + '/create-campaign'}" method="post" style="display:inline;">
+                            <button class="btn xs primary" type="submit">Create Campaign</button>
+                        </form>
+                    </span>
+
+                    <!-- Marketing Planner: Reject Campaign button (only for Finance approved payments) -->
+                    <span th:if="${adminRole != null and (adminRole.name()=='MARKETING' or adminRole.name()=='SUPER_ADMIN') and
+                                c.paymentStatus == 'PENDING' and c.campaignStatus == 'PENDING' and c.currentVersion == null}">
+                        <form th:action="@{'/admin/campaigns/' + ${c.id} + '/reject-campaign'}" method="post" style="display:inline;">
+                            <button class="btn xs danger" type="submit">Reject Campaign</button>
+                        </form>
+                    </span>
+
+                    <!-- Director or Super Admin: Approve/Reject/Archive -->
+                    <span th:if="${adminRole != null and (adminRole.name()=='DIRECTOR' or adminRole.name()=='SUPER_ADMIN') and c.campaignStatus == 'PENDING' and c.currentVersion == 0}">
+                        <form th:action="@{'/admin/campaigns/' + ${c.id} + '/approve'}" method="post" style="display:inline;">
+                            <button class="btn xs" type="submit">Approve</button>
+                        </form>
+                        <form th:action="@{'/admin/campaigns/' + ${c.id} + '/reject'}" method="post" style="display:inline;">
+                            <button class="btn xs danger" type="submit">Reject</button>
+                        </form>
+                    </span>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(campaigns)}">
+                <td colspan="8" class="muted center">NO CAMPAIGNS YET.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <footer class="admin-footer-sticky">
+        © 2025 AdBridgeLanka · Admin
+    </footer>
+    
+    <!-- JavaScript for Search Functionality -->
+    <script>
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.querySelector('.search-form').submit();
+        }
+    </script>
+</section>
+</html>

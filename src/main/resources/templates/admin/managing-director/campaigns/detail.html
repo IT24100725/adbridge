@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head" style="display:flex;justify-content:space-between;align-items:center;gap:1rem;">
+        <h1 class="page-title">Campaign Details</h1>
+        <a class="btn" th:href="@{/admin/managing-director/campaigns}">← Back to Campaigns</a>
+    </div>
+
+    <div class="card">
+        <h3>Campaign Information</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+                <div><strong>Booking ID:</strong> <span th:text="${campaign.bookingId}">ADB-20250101-001</span></div>
+                <div><strong>Client:</strong> <span th:text="${campaign.fullName}">John Doe</span></div>
+                <div><strong>Company:</strong> <span th:text="${campaign.companyName}">Company Name</span></div>
+                <div><strong>Email:</strong> <span th:text="${campaign.email}">john@example.com</span></div>
+                <div><strong>Contact:</strong> <span th:text="${campaign.contactNumber}">+1234567890</span></div>
+            </div>
+            <div>
+                <div><strong>Service Type:</strong> <span th:text="${campaign.serviceType}">TV_ADVERTISEMENT</span></div>
+                <div><strong>Total Amount:</strong> <span th:text="${campaign.totalAmount != null ? #numbers.formatInteger(campaign.totalAmount, 0, 'COMMA') + ' LKR' : 'N/A'}">10,000 LKR</span></div>
+                <div><strong>Payment Status:</strong> 
+                    <span class="badge" 
+                          th:class="${campaign.paymentStatus == 'PENDING'} ? 'badge warning' : 
+                                   (${campaign.paymentStatus == 'COMPLETED'} ? 'badge success' : 
+                                   (${campaign.paymentStatus == 'REJECTED'} ? 'badge danger' : 'badge'))"
+                          th:text="${campaign.paymentStatus}">PENDING</span>
+                </div>
+                <div><strong>Campaign Status:</strong> 
+                    <span class="badge" 
+                          th:class="${campaign.campaignStatus == 'PENDING'} ? 'badge warning' : 
+                                   (${campaign.campaignStatus == 'APPROVED'} ? 'badge success' : 
+                                   (${campaign.campaignStatus == 'REJECTED'} ? 'badge danger' : 'badge'))"
+                          th:text="${campaign.campaignStatus}">PENDING</span>
+                </div>
+                <div><strong>Progress:</strong> <span th:text="${campaign.currentVersion} + '%'">0%</span></div>
+            </div>
+        </div>
+        
+        <div th:if="${campaign.notes != null and !campaign.notes.isEmpty()}" style="margin-top: 1rem; padding: 1rem; background-color: #f8f9fa; border-radius: 4px;">
+            <strong>Notes:</strong>
+            <div th:text="${campaign.notes}" style="margin-top: 0.5rem; white-space: pre-wrap;"></div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top:1rem;">
+        <h3>Service Details</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div th:if="${campaign.optionOne != null and !campaign.optionOne.isEmpty()}">
+                <strong>Option 1:</strong> <span th:text="${campaign.optionOne}">Option 1</span>
+            </div>
+            <div th:if="${campaign.optionTwo != null and !campaign.optionTwo.isEmpty()}">
+                <strong>Option 2:</strong> <span th:text="${campaign.optionTwo}">Option 2</span>
+            </div>
+            <div th:if="${campaign.optionThree != null and !campaign.optionThree.isEmpty()}">
+                <strong>Option 3:</strong> <span th:text="${campaign.optionThree}">Option 3</span>
+            </div>
+            <div th:if="${campaign.optionFour != null and !campaign.optionFour.isEmpty()}">
+                <strong>Option 4:</strong> <span th:text="${campaign.optionFour}">Option 4</span>
+            </div>
+            <div th:if="${campaign.optionFive != null and !campaign.optionFive.isEmpty()}">
+                <strong>Option 5:</strong> <span th:text="${campaign.optionFive}">Option 5</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top:1rem;">
+        <h3>Approval Actions</h3>
+        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+            <form th:action="@{'/admin/managing-director/campaigns/' + ${campaign.id} + '/approve'}" method="post" style="display:inline;">
+                <button class="btn success" type="submit">✓ Approve Campaign</button>
+            </form>
+            <form th:action="@{'/admin/managing-director/campaigns/' + ${campaign.id} + '/reject'}" method="post" style="display:inline;">
+                <button class="btn danger" type="submit">✗ Reject Campaign</button>
+            </form>
+        </div>
+        <div style="margin-top: 1rem; padding: 1rem; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px;">
+            <strong>Note:</strong> Approving this campaign will complete the payment and activate the campaign. Rejecting will cancel both the payment and campaign.
+        </div>
+    </div>
+
+    <footer class="admin-footer-sticky">
+        © 2025 AdBridgeLanka · Managing Director
+    </footer>
+</section>
+</html>
+
+
+

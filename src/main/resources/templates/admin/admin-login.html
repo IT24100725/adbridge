@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::content})}">
+<th:block th:fragment="content">
+    <section class="auth-center">
+        <div class="login-container">
+            <div class="login-header">
+                <h1 class="login-title">Administrator Login</h1>
+                <p class="login-subtitle">Sign in to access the admin panel</p>
+            </div>
+
+            <div th:if="${param.error != null or loginError != null}" class="login-alert">
+                <span th:text="${loginError} ?: 'Invalid credentials. Please check your username, password and role.'">Invalid credentials</span>
+            </div>
+
+            <form method="post" th:action="@{/admin/login}" class="login-form-v2">
+                <div class="form-v2-group">
+                    <input type="text" 
+                           id="username" 
+                           name="username" 
+                           class="form-v2-input" 
+                           placeholder=" " 
+                           required 
+                           autocomplete="username" 
+                           autofocus>
+                    <label for="username" class="form-v2-label">Username *</label>
+                </div>
+
+                <div class="form-v2-group">
+                    <input type="password" 
+                           id="password" 
+                           name="password" 
+                           class="form-v2-input" 
+                           placeholder=" " 
+                           required 
+                           autocomplete="current-password">
+                    <label for="password" class="form-v2-label">Password *</label>
+                </div>
+
+                <div class="form-v2-group">
+                    <select id="role" 
+                            name="role" 
+                            class="form-v2-input" 
+                            required
+                            onchange="this.setAttribute('data-placeholder-shown', this.value != '' ? 'false' : 'true');">
+                        <option value="" disabled selected hidden>Select Role</option>
+                        <option value="ADMIN">Admin Assistant</option>
+                        <option value="FINANCE">Finance Coordinator</option>
+                        <option value="MARKETING">Marketing Planner</option>
+                        <option value="SUPPORT">Client Support</option>
+                        <option value="DEVELOPER">Senior Web Developer</option>
+                        <option value="DIRECTOR">Managing Director</option>
+                    </select>
+                    <label for="role" class="form-v2-label">Role *</label>
+                </div>
+
+                <button class="btn-v2 primary login-btn-full" type="submit">
+                    Log In
+                </button>
+
+                <div class="login-footer">
+                    <a th:href="@{/}" class="back-link">← Back to site</a>
+                </div>
+            </form>
+        </div>
+    </section>
+</th:block>
+</html>

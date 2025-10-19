@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head">
+        <h1 class="page-title" th:text="${pageHeading}">Dashboard</h1>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="dashboard-grid">
+        <div class="metric-card">
+            <h3>Total Users</h3>
+            <div class="metric-value" th:text="${totalUsers}">0</div>
+        </div>
+        
+        <div class="metric-card">
+            <h3>Total Campaigns</h3>
+            <div class="metric-value" th:text="${totalCampaigns}">0</div>
+        </div>
+        
+        <div class="metric-card">
+            <h3>Active Campaigns</h3>
+            <div class="metric-value" th:text="${activeCampaigns}">0</div>
+        </div>
+        
+        <div class="metric-card">
+            <h3>Total Revenue</h3>
+            <div class="metric-value" th:text="${#numbers.formatDecimal(totalRevenue, 0, 0)}">0</div>
+        </div>
+        
+        <div class="metric-card">
+            <h3>Total Tasks</h3>
+            <div class="metric-value" th:text="${totalTasks}">0</div>
+        </div>
+        
+        <div class="metric-card">
+            <h3>Completed Tasks</h3>
+            <div class="metric-value" th:text="${completedTasks}">0</div>
+        </div>
+        
+        <div class="metric-card">
+            <h3>Pending Tasks</h3>
+            <div class="metric-value" th:text="${pendingTasks}">0</div>
+        </div>
+        
+        <!-- Support Metrics -->
+        <div class="metric-card">
+            <h3>Support Tickets</h3>
+            <div class="metric-value" th:text="${totalSupportTickets}">0</div>
+        </div>
+        
+        <div class="metric-card">
+            <h3>Open Tickets</h3>
+            <div class="metric-value" th:text="${openTickets}" style="color: #e74c3c;">0</div>
+        </div>
+        
+        <div class="metric-card">
+            <h3>Resolved Tickets</h3>
+            <div class="metric-value" th:text="${resolvedTickets}" style="color: #27ae60;">0</div>
+        </div>
+        
+        <div class="metric-card">
+            <h3>Closed Tickets</h3>
+            <div class="metric-value" th:text="${closedTickets}" style="color: #95a5a6;">0</div>
+        </div>
+    </div>
+    
+    <!-- Support Reports Section -->
+    <div class="dashboard-section">
+        <h2>Support Reports</h2>
+        
+        <div class="reports-grid">
+            <!-- Tickets by Priority -->
+            <div class="report-card">
+                <h3>Tickets by Priority</h3>
+                <div class="priority-stats">
+                    <div class="priority-item" th:each="priority : ${ticketsByPriority}">
+                        <span class="priority-label" th:text="${priority.key}">HIGH</span>
+                        <span class="priority-count" th:text="${priority.value}">5</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Support Activity -->
+            <div class="report-card">
+                <h3>Recent Support Activity</h3>
+                <div class="recent-tickets" th:if="${!recentTickets.isEmpty()}">
+                    <div class="ticket-item" th:each="ticket : ${recentTickets}">
+                        <div class="ticket-info">
+                            <strong th:text="${ticket.clientName}">Client Name</strong>
+                            <span class="ticket-status" th:text="${ticket.status}" 
+                                  th:classappend="${ticket.status.name() == 'OPEN'} ? 'status-open' : 
+                                                (${ticket.status.name() == 'RESOLVED'} ? 'status-resolved' : 'status-closed')">OPEN</span>
+                        </div>
+                        <div class="ticket-subject" th:text="${ticket.subject}">Subject</div>
+                        <div class="ticket-date" th:text="${#temporals.format(ticket.createdAt, 'MMM dd, yyyy')}">Jan 15, 2025</div>
+                    </div>
+                </div>
+                <div th:if="${recentTickets.isEmpty()}" class="no-data">No recent support tickets</div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .metric-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .metric-card h3 {
+            margin: 0 0 0.5rem 0;
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .dashboard-section {
+            margin: 2rem 0;
+        }
+        
+        .dashboard-section h2 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+        
+        .report-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .report-card h3 {
+            margin: 0 0 1rem 0;
+            color: #333;
+            font-size: 1.1rem;
+        }
+        
+        .priority-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .priority-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .priority-label {
+            font-weight: 500;
+        }
+        
+        .priority-count {
+            background: #007bff;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        
+        .recent-tickets {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .ticket-item {
+            padding: 0.75rem;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            background: #f8f9fa;
+        }
+        
+        .ticket-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.25rem;
+        }
+        
+        .ticket-status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-open {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-resolved {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-closed {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .ticket-subject {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.25rem;
+        }
+        
+        .ticket-date {
+            font-size: 0.8rem;
+            color: #999;
+        }
+        
+        .no-data {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            padding: 1rem;
+        }
+    </style>
+</section>
+</html>

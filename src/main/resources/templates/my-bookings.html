@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::content})}">
+<th:block th:fragment="content">
+
+    <!-- HEADER -->
+    <section class="section">
+        <div class="section-head">
+            <h2>My Bookings</h2>
+            <p>View and manage your campaign bookings</p>
+        </div>
+    </section>
+
+    <!-- IMPORTANT NOTICE -->
+    <section class="section notice-section">
+        <div class="container">
+            <div class="notice-box">
+                <div class="notice-icon">⚠️</div>
+                        <div class="notice-content">
+                            <h3>Important Notice</h3>
+                            <p><strong>Booking Cancellation Policy:</strong> You can only cancel your booking <strong>before it is approved by admin</strong>. Once a campaign is approved, cancellation is no longer available.</p>
+                        </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- BOOKINGS LIST -->
+    <section class="section alt">
+        <div class="container">
+            <div th:if="${bookings.isEmpty()}" class="empty-state">
+                <div class="empty-icon">📋</div>
+                <h3>No Bookings Yet</h3>
+                <p>You haven't made any bookings yet. Start your first campaign today!</p>
+                <a th:href="@{/book}" class="btn primary">Start Booking</a>
+            </div>
+
+            <div th:if="${!bookings.isEmpty()}" class="bookings-grid">
+                <div th:each="booking : ${bookings}" class="booking-card">
+                    <div class="booking-header">
+                        <div class="booking-id">
+                            <span class="label">Booking ID:</span>
+                            <span class="value" th:text="${booking.bookingId}">BOOK-123456</span>
+                        </div>
+                        <div class="booking-status" th:classappend="${booking.paymentStatus.toLowerCase()}">
+                            <span th:text="${booking.paymentStatus}">PENDING</span>
+                        </div>
+                    </div>
+                    
+                    <div class="booking-details">
+                        <div class="service-info">
+                            <h4 th:text="${booking.serviceType}">TV Advertisement</h4>
+                            <p th:text="${booking.companyName}">ABC Company</p>
+                        </div>
+                        
+                        <div class="detail-row">
+                            <span class="label">Client:</span>
+                            <span class="value" th:text="${booking.fullName}">John Doe</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Email:</span>
+                            <span class="value" th:text="${booking.email}">john@example.com</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Contact:</span>
+                            <span class="value" th:text="${booking.contactNumber}">+94 77 123 4567</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Total Amount:</span>
+                            <span class="value amount" th:text="'Rs. ' + ${#numbers.formatDecimal(booking.totalAmount, 0, 'COMMA', 0, 'POINT')}">Rs. 50,000</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Created:</span>
+                            <span class="value" th:text="${#temporals.format(booking.lastModifiedAt, 'dd MMM yyyy HH:mm')}">15 Jan 2024 14:30</span>
+                        </div>
+                    </div>
+                    
+                    <div class="booking-actions">
+                        <a th:href="@{/cancel-booking/{id}(id=${booking.bookingId})}" 
+                           class="btn small danger"
+                           th:if="${booking.paymentStatus != 'CANCELLED' and booking.paymentStatus != 'APPROVED' and booking.paymentStatus != 'COMPLETED' and booking.campaignStatus != 'APPROVED'}">
+                           Cancel Booking
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <style>
+        .notice-section {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .notice-box {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            background: #fff3cd;
+            border-radius: var(--radius);
+        }
+        
+        .notice-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .notice-content h3 {
+            margin: 0 0 0.5rem 0;
+            color: #856404;
+            font-size: 1.1rem;
+        }
+        
+        .notice-content p {
+            margin: 0;
+            color: #856404;
+            line-height: 1.5;
+        }
+        
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-dim);
+        }
+        
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .bookings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .booking-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            transition: all 0.2s ease;
+        }
+        
+        .booking-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .booking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .booking-id .label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            display: block;
+        }
+        
+        .booking-id .value {
+            font-weight: 600;
+            color: var(--text);
+        }
+        
+        .booking-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        
+        .booking-status.pending {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .booking-status.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .booking-status.processing {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .service-info {
+            margin-bottom: 1rem;
+        }
+        
+        .service-info h4 {
+            margin: 0 0 0.25rem 0;
+            color: var(--text);
+            font-size: 1.1rem;
+        }
+        
+        .service-info p {
+            margin: 0;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+        
+        .booking-details {
+            margin-bottom: 1.5rem;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .detail-row .label {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+        
+        .detail-row .value {
+            color: var(--text);
+            font-weight: 500;
+        }
+        
+        .detail-row .value.amount {
+            color: var(--accent);
+            font-weight: 600;
+        }
+        
+        .booking-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+        
+        .btn.danger {
+            background: #dc3545;
+            color: white;
+            border: 1px solid #dc3545;
+        }
+        
+        .btn.danger:hover {
+            background: #c82333;
+            border-color: #bd2130;
+        }
+        
+        @media (max-width: 768px) {
+            .bookings-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .booking-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+
+</th:block>
+</html>

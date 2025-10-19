@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::content})}">
+<th:block th:fragment="content">
+
+    <!-- Original Form Structure -->
+    <section class="section">
+        <div class="auth-box full" style="max-width:860px;margin:0 auto;">
+            <div class="section-head" style="text-align:center;margin-top:-.4rem;margin-bottom:1.1rem;">
+                <h2 th:text="${booking.serviceType} == null ? 'Book a Campaign' : (${booking.serviceType} + ' Booking Form')">Book</h2>
+                <p>Fill in your details and select a service to get started.</p>
+            </div>
+            <div th:if="${submitted}">
+                <h3 class="feature-title" style="margin-bottom:.4rem;">Thank you!</h3>
+                <p class="feature-intro">We will contact you soon to confirm your booking.</p>
+            </div>
+
+            <form th:if="${submitted} == null" th:action="@{/book}" th:object="${booking}" method="post">
+                <input type="hidden" th:if="${editId != null}" name="editId" th:value="${editId}">
+                <!-- Personal Details -->
+                <div class="cards" style="grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+                    <div class="field"><label>Full Name</label><input th:field="*{fullName}" required/></div>
+                    <div class="field"><label>Company Name (optional)</label><input th:field="*{companyName}"/></div>
+                    <div class="field"><label>Contact Number</label><input th:field="*{contactNumber}" required/></div>
+                    <div class="field"><label>Email Address</label><input th:field="*{email}" type="email" required/></div>
+                </div>
+
+                <!-- Service Selection -->
+                <div class="field" style="margin-bottom:1rem;" th:if="${lockedService == null or !lockedService}">
+                    <label>Service</label>
+                    <select th:field="*{serviceType}" id="serviceType" required>
+                        <option value="">-- Select a service --</option>
+                        <option th:each="t : ${serviceTypes}" th:value="${t}" th:text="${t}"></option>
+                    </select>
+                </div>
+                <input type="hidden" th:if="${lockedService}" th:field="*{serviceType}"/>
+
+                <!-- Service-specific groups -->
+                <div id="group-tv" class="svc-group" style="display:none;">
+                    <div class="cards" style="grid-template-columns:1fr;gap:1rem;">
+                        <div class="field"><label>TV Channels</label>
+                            <div class="checkbox-group" data-target="optionOne">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="tv-sirasa" value="Sirasa TV" name="tvChannels">
+                                    <label for="tv-sirasa">Sirasa TV</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="tv-swarnavahini" value="Swarnavahini" name="tvChannels">
+                                    <label for="tv-swarnavahini">Swarnavahini</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="tv-derana" value="TV Derana" name="tvChannels">
+                                    <label for="tv-derana">TV Derana</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="tv-hiru" value="Hiru TV" name="tvChannels">
+                                    <label for="tv-hiru">Hiru TV</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="tv-other" value="Other" name="tvChannels">
+                                    <label for="tv-other">Other</label>
+                                </div>
+                            </div>
+                            <input type="hidden" name="optionOne" th:field="*{optionOne}" id="tv-optionOne"/>
+                        </div>
+                        <div class="field"><label>Ad Duration (seconds)</label>
+                            <input th:field="*{optionTwo}" list="tvDurations" placeholder="Type or pick"/>
+                            <datalist id="tvDurations">
+                                <option value="10"></option>
+                                <option value="15"></option>
+                                <option value="25"></option>
+                                <option value="30"></option>
+                            </datalist>
+                        </div>
+                        <div class="field"><label>Number of Days</label><input th:field="*{optionThree}" placeholder="e.g., 7"/></div>
+                        <div class="field"><label>Time Slot</label>
+                            <div class="checkbox-group" data-target="optionFour">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="tv-morning" value="Morning" name="timeSlots">
+                                    <label for="tv-morning">Morning</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="tv-evening" value="Evening" name="timeSlots">
+                                    <label for="tv-evening">Evening</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="tv-prime-time" value="Prime Time" name="timeSlots">
+                                    <label for="tv-prime-time">Prime Time</label>
+                                </div>
+                            </div>
+                            <input type="hidden" name="optionFour" th:field="*{optionFour}" id="tv-optionFour"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="group-radio" class="svc-group" style="display:none;">
+                    <div class="cards" style="grid-template-columns:repeat(2,1fr);gap:1rem;">
+                        <div class="field"><label>Radio Stations</label>
+                            <div class="checkbox-group" data-target="optionOne">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="radio-hiru" value="Hiru FM" name="radioStations">
+                                    <label for="radio-hiru">Hiru FM</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="radio-sirasa" value="Sirasa FM" name="radioStations">
+                                    <label for="radio-sirasa">Sirasa FM</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="radio-shaa" value="Shaa FM" name="radioStations">
+                                    <label for="radio-shaa">Shaa FM</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="radio-yes" value="Yes FM" name="radioStations">
+                                    <label for="radio-yes">Yes FM</label>
+                                </div>
+                            </div>
+                            <input type="hidden" th:field="*{optionOne}"/>
+                        </div>
+                        <div class="field"><label>Ad Duration (sec)</label>
+                            <input th:field="*{optionTwo}" list="radioDurations" placeholder="Type or pick"/>
+                            <datalist id="radioDurations">
+                                <option value="10"></option>
+                                <option value="15"></option>
+                                <option value="30"></option>
+                                <option value="45"></option>
+                            </datalist>
+                        </div>
+                        <div class="field"><label>Number of Plays per Day</label><input th:field="*{optionThree}"/></div>
+                        <div class="field"><label>Time Slot</label>
+                            <div class="checkbox-group" data-target="optionFour">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="radio-morning" value="Morning" name="timeSlots">
+                                    <label for="radio-morning">Morning</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="radio-evening" value="Evening" name="timeSlots">
+                                    <label for="radio-evening">Evening</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="radio-prime-time" value="Prime Time" name="timeSlots">
+                                    <label for="radio-prime-time">Prime Time</label>
+                                </div>
+                            </div>
+                            <input type="hidden" th:field="*{optionFour}"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="group-social" class="svc-group" style="display:none;">
+                    <div class="cards" style="grid-template-columns:repeat(2,1fr);gap:1rem;">
+                        <div class="field"><label>Platforms</label>
+                            <div class="checkbox-group platforms-grid" data-target="optionOne">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="social-facebook" value="Facebook" name="platforms">
+                                    <label for="social-facebook">
+                                        <svg class="platform-logo" viewBox="0 0 24 24" width="16" height="16">
+                                            <path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                                        </svg>
+                                        Facebook
+                                    </label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="social-instagram" value="Instagram" name="platforms">
+                                    <label for="social-instagram">
+                                        <svg class="platform-logo" viewBox="0 0 24 24" width="16" height="16">
+                                            <path fill="#E4405F" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.689-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                                        </svg>
+                                        Instagram
+                                    </label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="social-tiktok" value="TikTok" name="platforms">
+                                    <label for="social-tiktok">
+                                        <svg class="platform-logo" viewBox="0 0 24 24" width="16" height="16">
+                                            <path fill="#000000" d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+                                        </svg>
+                                        TikTok
+                                    </label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="social-youtube" value="YouTube" name="platforms">
+                                    <label for="social-youtube">
+                                        <svg class="platform-logo" viewBox="0 0 24 24" width="16" height="16">
+                                            <path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                                        </svg>
+                                        YouTube
+                                    </label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="social-x" value="X (Twitter)" name="platforms">
+                                    <label for="social-x">
+                                        <svg class="platform-logo" viewBox="0 0 24 24" width="16" height="16">
+                                            <path fill="#000000" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                                        </svg>
+                                        X (Twitter)
+                                    </label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="social-linkedin" value="LinkedIn" name="platforms">
+                                    <label for="social-linkedin">
+                                        <svg class="platform-logo" viewBox="0 0 24 24" width="16" height="16">
+                                            <path fill="#0077B5" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+                                        </svg>
+                                        LinkedIn
+                                    </label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="social-other" value="Other" name="platforms">
+                                    <label for="social-other">
+                                        <svg class="platform-logo" viewBox="0 0 24 24" width="16" height="16">
+                                            <path fill="#666666" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+                                        </svg>
+                                        Other
+                                    </label>
+                                </div>
+                            </div>
+                            <input type="hidden" name="socialOptionOne"/>
+                        </div>
+                        <div class="field"><label>Campaign Duration</label>
+                            <input th:field="*{optionTwo}" list="socialDurations" placeholder="Type or pick"/>
+                            <datalist id="socialDurations">
+                                <option value="1 week"></option>
+                                <option value="2 weeks"></option>
+                                <option value="1 month"></option>
+                            </datalist>
+                        </div>
+                        <div class="field"><label>Content Type</label>
+                            <div class="checkbox-group content-types-grid" data-target="optionThree">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="content-image" value="Image" name="contentTypes">
+                                    <label for="content-image">Image</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="content-video" value="Video" name="contentTypes">
+                                    <label for="content-video">Video</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="content-story" value="Story" name="contentTypes">
+                                    <label for="content-story">Story</label>
+                                </div>
+                            </div>
+                            <input type="hidden" name="optionThree"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="group-newspaper" class="svc-group" style="display:none;">
+                    <div class="cards" style="grid-template-columns:repeat(2,1fr);gap:1rem;">
+                        <div class="field"><label>Newspaper Name</label>
+                            <div class="checkbox-group newspapers-grid" data-target="optionOne">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="newspaper-daily-mirror" value="Daily Mirror" name="newspapers">
+                                    <label for="newspaper-daily-mirror">Daily Mirror</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="newspaper-silumina" value="Silumina" name="newspapers">
+                                    <label for="newspaper-silumina">Silumina</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="newspaper-lankadeepa" value="Lankadeepa" name="newspapers">
+                                    <label for="newspaper-lankadeepa">Lankadeepa</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="newspaper-sunday-times" value="Sunday Times" name="newspapers">
+                                    <label for="newspaper-sunday-times">Sunday Times</label>
+                                </div>
+                            </div>
+                            <input type="hidden" name="optionOne"/>
+                        </div>
+                        <div class="field"><label>Ad Size</label>
+                            <select th:field="*{optionTwo}"><option value="">Select size</option><option value="box">Box</option><option value="half page">Half Page</option><option value="full page">Full Page</option></select>
+                        </div>
+                        <div class="field"><label>Colour Option</label>
+                            <div class="radio-row">
+                                <label><input type="radio" name="colour" value="colour" th:field="*{optionThree}"> Colour</label>
+                                <label><input type="radio" name="colour" value="black & white" th:field="*{optionThree}"> Black & White</label>
+                            </div>
+                        </div>
+                        <div class="field"><label>Number of Days</label>
+                            <input th:field="*{optionFour}" list="daysList" placeholder="Type or pick"/>
+                            <datalist id="daysList">
+                                <option value="1"></option>
+                                <option value="3"></option>
+                                <option value="7"></option>
+                                <option value="14"></option>
+                            </datalist>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="group-billboard" class="svc-group" style="display:none;">
+                    <div class="cards" style="grid-template-columns:repeat(2,1fr);gap:1rem;">
+                        <div class="field"><label>Location</label>
+                            <div class="checkbox-group locations-grid" data-target="optionOne">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="location-colombo" value="Colombo" name="locations">
+                                    <label for="location-colombo">Colombo</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="location-kandy" value="Kandy" name="locations">
+                                    <label for="location-kandy">Kandy</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="location-galle" value="Galle" name="locations">
+                                    <label for="location-galle">Galle</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="location-kurunegala" value="Kurunegala" name="locations">
+                                    <label for="location-kurunegala">Kurunegala</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="location-matara" value="Matara" name="locations">
+                                    <label for="location-matara">Matara</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="location-other" value="Other" name="locations">
+                                    <label for="location-other">Other</label>
+                                </div>
+                            </div>
+                            <input type="hidden" name="optionOne"/>
+                        </div>
+                        <div class="field"><label>Billboard Size</label>
+                            <select th:field="*{optionTwo}"><option value="">Select size</option>
+                                <option value="small">Small (Rs. 5,000)</option>
+                                <option value="medium">Medium (Rs. 7,500)</option>
+                                <option value="large">Large (Rs. 10,000)</option>
+                            </select>
+                        </div>
+                        <div class="field"><label>Display Duration (Days)</label>
+                            <input th:field="*{optionThree}" list="billboardDurations" placeholder="Type or pick"/>
+                            <datalist id="billboardDurations">
+                                <option value="1 week"></option>
+                                <option value="2 weeks"></option>
+                                <option value="1 month"></option>
+                            </datalist>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="group-banner" class="svc-group" style="display:none;">
+                    <div class="cards" style="grid-template-columns:repeat(2,1fr);gap:1rem;">
+                        <div class="field"><label>Website Type</label>
+                            <div class="checkbox-group websites-grid" data-target="optionOne">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="website-news" value="News" name="websiteTypes">
+                                    <label for="website-news">News</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="website-blog" value="Blog" name="websiteTypes">
+                                    <label for="website-blog">Blog</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="website-ecommerce" value="E-commerce" name="websiteTypes">
+                                    <label for="website-ecommerce">E-commerce</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="website-forum" value="Forum" name="websiteTypes">
+                                    <label for="website-forum">Forum</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="website-portal" value="Portal" name="websiteTypes">
+                                    <label for="website-portal">Portal</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="website-other" value="Other" name="websiteTypes">
+                                    <label for="website-other">Other</label>
+                                </div>
+                            </div>
+                            <input type="hidden" name="optionOne" th:field="*{optionOne}"/>
+                        </div>
+                        <div class="field"><label>Banner Size</label>
+                            <select th:field="*{optionTwo}"><option value="">Select size</option><option value="small">Small (Rs. 1,500)</option><option value="medium">Medium (Rs. 2,500)</option><option value="large">Large (Rs. 4,000)</option></select>
+                        </div>
+                        <div class="field"><label>Tracking Required</label>
+                            <div class="radio-row">
+                                <label><input type="radio" name="tracking" value="true" th:field="*{optionFour}"> Yes (Rs. 1,000)</label>
+                                <label><input type="radio" name="tracking" value="false" th:field="*{optionFour}"> No</label>
+                            </div>
+                        </div>
+                        <div class="field"><label>Duration (Days)</label>
+                            <input th:field="*{optionFive}" type="number" min="1" placeholder="Enter number of days" required/>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field" style="margin-top:1rem;">
+                    <label>Notes (optional)</label>
+                    <textarea th:field="*{notes}" rows="4" style="width:100%;"></textarea>
+                </div>
+
+                <div class="section-cta" style="justify-content:center;">
+                    <button type="button" class="btn secondary" onclick="debugFormData()" style="margin-right: 1rem;">Debug Form Data</button>
+                    <a href="#" class="link-underline submit-link" onclick="this.closest('form').submit();return false;">Submit Booking</a>
+                </div>
+            </form>
+        </div>
+    </section>
+
+
+    <script th:src="@{/js/booking.js}"></script>
+
+
+</th:block>
+</html>
+

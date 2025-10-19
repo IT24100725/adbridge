@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head">
+        <h1 class="page-title" th:text="${pageHeading}">Service</h1>
+        <div><a href="/admin/services" class="btn">Back</a></div>
+    </div>
+
+    <div th:if="${errorMsg}" class="alert danger" th:text="${errorMsg}"></div>
+
+    <form th:action="${serviceItem.id} == null ? 
+            @{/admin/services} : @{'/admin/services/' + ${serviceItem.id} + '/edit'}"
+          method="post" th:object="${serviceItem}" class="form-grid">
+
+        <div class="form-group">
+            <label>Title *</label>
+            <input th:field="*{title}" type="text" required>
+            <div class="error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+        </div>
+
+        <div class="form-group">
+            <label>Slug (optional)</label>
+            <input th:field="*{slug}" type="text" placeholder="auto-generated if empty">
+        </div>
+
+        <div class="form-group">
+            <label>Short Description</label>
+            <input th:field="*{shortDescription}" type="text">
+        </div>
+
+        <div class="form-group">
+            <label>Price</label>
+            <input th:field="*{price}" type="number" step="0.01" placeholder="0.00">
+        </div>
+
+        <div class="form-group full">
+            <label>Description</label>
+            <textarea th:field="*{description}" rows="4" placeholder="Detailed service description"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Status *</label>
+            <select th:field="*{status}">
+                <option th:each="status : ${statuses}" 
+                        th:value="${status}" 
+                        th:text="${status}"></option>
+            </select>
+        </div>
+
+        <div class="form-actions full">
+            <button class="btn primary" type="submit">Save</button>
+            <a class="btn" href="/admin/services">Cancel</a>
+        </div>
+    </form>
+</section>
+</html>

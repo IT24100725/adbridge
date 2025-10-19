@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::content})}">
+<th:block th:fragment="content">
+
+    <!-- HEADER -->
+    <section class="section">
+        <div class="section-head">
+            <h2>My Payments</h2>
+            <p th:if="${user != null}">Welcome, <span th:text="${user.fullName}">User</span>! Here are your payment history.</p>
+            <p th:if="${user == null}">Please log in to view your payments.</p>
+        </div>
+    </section>
+
+    <!-- PAYMENTS LIST -->
+    <section class="section alt">
+        <div class="container">
+            <div th:if="${#lists.isEmpty(payments)}" class="empty-state">
+                <div class="empty-icon">💳</div>
+                <h3>No Payments Yet!</h3>
+                <p>It looks like you haven't made any payments yet. Complete your first booking to see payment history here!</p>
+                <a th:href="@{/my-bookings}" class="btn primary">View My Bookings</a>
+            </div>
+
+            <div th:unless="${#lists.isEmpty(payments)}" class="payments-grid">
+                <div th:each="payment : ${payments}" class="payment-card">
+                    <div class="payment-header">
+                        <div class="payment-id">
+                            <span class="label">Payment ID:</span>
+                            <span class="value" th:text="${payment.paymentId}">PAY-123456</span>
+                        </div>
+                        <div class="payment-status" th:classappend="${payment.paymentStatus.name().toLowerCase()}">
+                            <span th:text="${payment.paymentStatus}">COMPLETED</span>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-details">
+                        <div class="detail-row">
+                            <span class="label">Booking ID:</span>
+                            <span class="value" th:text="${payment.bookingId}">BOOK-123456</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Payment Method:</span>
+                            <span class="value" th:text="${payment.paymentMethod}">CARD</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Amount:</span>
+                            <span class="value amount" th:text="'LKR ' + ${#numbers.formatDecimal(payment.amount, 0, 'COMMA', 0, 'POINT')}">LKR 50,000</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Currency:</span>
+                            <span class="value" th:text="${payment.currency}">LKR</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Payment Date:</span>
+                            <span class="value" th:text="${#temporals.format(payment.createdAt, 'dd MMM yyyy HH:mm')}">15 Jan 2024 14:30</span>
+                        </div>
+                        <div th:if="${payment.externalTransactionId != null}" class="detail-row">
+                            <span class="label">Transaction ID:</span>
+                            <span class="value" th:text="${payment.externalTransactionId}">TXN-123456</span>
+                        </div>
+                        <div th:if="${payment.paymentNotes != null and !payment.paymentNotes.isEmpty()}" class="detail-row">
+                            <span class="label">Notes:</span>
+                            <span class="value" th:text="${payment.paymentNotes}">Payment notes</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <style>
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-dim);
+        }
+        
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .payments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .payment-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            transition: all 0.2s ease;
+        }
+        
+        .payment-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .payment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .payment-id .label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            display: block;
+        }
+        
+        .payment-id .value {
+            font-weight: 600;
+            color: var(--text);
+        }
+        
+        .payment-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        
+        .payment-status.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .payment-status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .payment-status.processing {
+            background: #cce5ff;
+            color: #004085;
+        }
+        
+        .payment-status.failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .payment-status.cancelled {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+        
+        .payment-details {
+            margin-bottom: 1rem;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .detail-row .label {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+        
+        .detail-row .value {
+            color: var(--text);
+            font-weight: 500;
+        }
+        
+        .detail-row .value.amount {
+            color: var(--accent);
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .payments-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+</th:block>
+</html>

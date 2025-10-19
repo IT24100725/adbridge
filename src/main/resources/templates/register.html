@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::content})}">
+<th:block th:fragment="content">
+  <style>
+    .site-footer{display:none;}
+  </style>
+  <section class="section" style="min-height:calc(100vh - 70px);display:flex;justify-content:center;align-items:flex-start;padding-bottom:8rem;">
+    <div class="auth-box" style="max-width:500px;margin:2rem auto 4rem;">
+      <!-- Use navbar logo style -->
+      <div style="text-align:center;margin-bottom:1.2rem;">
+        <div class="logo" style="font-size:1.4rem;">Ad<span>BridgeLanka</span></div>
+      </div>
+      
+      <h2 th:text="${title}" style="font-family:serif;font-size:1.5rem;text-align:center;margin-bottom:0.5rem;color:var(--text);"></h2>
+      <p th:text="${subtitle}" style="text-align:center;color:var(--text-dim);font-size:0.9rem;margin-bottom:2rem;"></p>
+      
+      <div th:if="${error}" class="error-message" style="background:rgba(255,0,0,0.1);border:1px solid rgba(255,0,0,0.3);color:#ff4444;padding:0.75rem;border-radius:var(--radius);margin-bottom:1rem;font-size:0.8rem;">
+        <span th:text="${error}"></span>
+      </div>
+      
+      <div th:if="${success}" class="success-message" style="background:rgba(0,255,0,0.1);border:1px solid rgba(0,255,0,0.3);color:#00aa00;padding:0.75rem;border-radius:var(--radius);margin-bottom:1rem;font-size:0.8rem;">
+        <span th:text="${success}"></span>
+      </div>
+      
+      <form method="post" th:action="@{/register}" autocomplete="off">
+        <input type="hidden" name="next" th:value="${next}">
+        <div class="field">
+          <label>Full Name</label>
+          <input name="fullName" type="text" autocomplete="off" required>
+        </div>
+        
+        <div class="field">
+          <label>Email</label>
+          <input name="email" type="email" placeholder="Enter your email" autocomplete="off" required>
+        </div>
+        
+        <div class="field">
+          <label>Phone Number</label>
+          <input name="phone" type="tel" placeholder="+94" autocomplete="off" required>
+        </div>
+        
+        <div class="field">
+          <label>Company Name <span style="color:var(--text-dim);font-size:0.7rem;">(Optional)</span></label>
+          <input name="companyName" type="text" placeholder="Enter your company name" autocomplete="off">
+        </div>
+        
+        <div class="field">
+          <label>Username</label>
+          <input name="username" type="text" placeholder="Choose a unique username" autocomplete="off" required>
+        </div>
+        
+        <div class="field">
+          <label>Password</label>
+          <input name="password" type="password" placeholder="Enter your password (8+ chars, uppercase, symbols)" autocomplete="new-password" required>
+          <small style="color:var(--text-dim);font-size:0.7rem;margin-top:0.25rem;display:block;">
+            Password must be at least 8 characters long, contain uppercase letters and special symbols (@, #, $, %, ^, &, +, =, !)
+          </small>
+        </div>
+        
+        <div class="field">
+          <label>Confirm Password</label>
+          <input name="confirmPassword" type="password" placeholder="Confirm your password" autocomplete="new-password" required>
+        </div>
+        
+        <div style="margin-top:1.6rem;text-align:center;">
+          <a href="#" class="link-underline submit-link" onclick="this.closest('form').submit();return false;">Sign Up</a>
+        </div>
+        
+        <div style="margin-top:1.5rem;text-align:center;">
+          <p style="color:var(--text-dim);font-size:0.8rem;margin:0;">
+            You already have an account? 
+            <a th:href="@{/login(next=${next})}" class="form-link" style="color:var(--accent);text-decoration:none;font-weight:500;">Log in</a>
+          </p>
+        </div>
+        
+        <div style="margin-top:1rem;text-align:center;">
+          <a th:href="@{/}" class="form-link" style="color:var(--text-dim);text-decoration:none;font-size:0.8rem;">← Back Home</a>
+        </div>
+      </form>
+    </div>
+  </section>
+</th:block>
+</html>
+
+
+
+
+
+
+
+

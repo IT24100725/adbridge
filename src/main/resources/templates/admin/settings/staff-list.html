@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head">
+        <h1 class="page-title" th:text="${pageHeading}">Staff Management</h1>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <!-- Add Staff Member Form (v2 with logic) -->
+    <div th:if="${currentRoleEnum == T(com.example.adbridge.model.AdminRole).DEVELOPER}">
+        <div class="form-container-v2">
+            <h2 class="form-v2-header">Add New Staff Member</h2>
+            <form th:action="@{/admin/staff/add}" method="post" class="form-v2">
+
+                <div class="form-v2-group">
+                    <input type="text" id="fullName" name="fullName" class="form-v2-input" placeholder=" " required>
+                    <label for="fullName" class="form-v2-label">Full Name *</label>
+                </div>
+
+                <div class="form-v2-group">
+                    <input type="email" id="email" name="email" class="form-v2-input" placeholder=" " required>
+                    <label for="email" class="form-v2-label">Email *</label>
+                </div>
+
+                <div class="form-v2-group">
+                    <input type="tel" id="phone" name="phone" class="form-v2-input" placeholder=" ">
+                    <label for="phone" class="form-v2-label">Phone</label>
+                </div>
+
+                <div class="form-v2-group">
+                    <input type="text" id="position" name="position" class="form-v2-input" placeholder=" " required>
+                    <label for="position" class="form-v2-label">Position *</label>
+                </div>
+
+                <div class="form-v2-group">
+                    <select id="role" name="role" class="form-v2-input" required onchange="this.setAttribute('data-placeholder-shown', this.value != '' ? 'false' : 'true');">
+                        <option value="" disabled selected hidden>Select Role *</option>
+                        <option th:each="roleOpt : ${roles}" th:value="${roleOpt}" th:text="${#strings.capitalizeWords(#strings.replace(roleOpt, '_', ' '))}"></option>
+                    </select>
+                    <label for="role" class="form-v2-label">Role *</label>
+                </div>
+
+                <div class="form-v2-group">
+                    <input type="text" id="address" name="address" class="form-v2-input" placeholder=" ">
+                    <label for="address" class="form-v2-label">Address</label>
+                </div>
+
+                <div class="form-v2-group full-width">
+                    <input type="text" id="username" name="username" class="form-v2-input" placeholder=" ">
+                    <label for="username" class="form-v2-label">Username (Optional - Auto-generated if empty)</label>
+                </div>
+
+                <div class="form-v2-group full-width">
+                    <input type="password" id="password" name="password" class="form-v2-input" placeholder=" ">
+                    <label for="password" class="form-v2-label">Password (Optional - Auto-generated if empty)</label>
+                </div>
+
+                <div class="form-v2-actions">
+                    <button type="submit" class="btn-v2 primary">Add Staff Member</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Staff Members List (with logic) -->
+    <div class="card" style="margin-top: 2rem;">
+        <h3 style="margin:0 0 .8rem 0;">Staff Members</h3>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Position</th>
+                <th>Role</th>
+                <th>Username</th>
+                <th>Password</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="staff : ${staffMembers}">
+                <td th:text="${staff.fullName}"></td>
+                <td th:text="${staff.email}"></td>
+                <td th:text="${staff.phone}"></td>
+                <td th:text="${staff.position}"></td>
+                <td th:text="${#strings.capitalizeWords(#strings.replace(staff.role, '_', ' '))}"></td >
+                <td>
+                    <span th:if="${currentRole == staff.role or currentRoleEnum == T(com.example.adbridge.model.AdminRole).DEVELOPER}" th:text="${staff.username}" class="credential"></span>
+                    <span th:unless="${currentRole == staff.role or currentRoleEnum == T(com.example.adbridge.model.AdminRole).DEVELOPER}" class="muted">***</span>
+                </td>
+                <td>
+                    <span th:if="${currentRole == staff.role or currentRoleEnum == T(com.example.adbridge.model.AdminRole).DEVELOPER}" th:text="${staff.password}" class="credential"></span>
+                    <span th:unless="${currentRole == staff.role or currentRoleEnum == T(com.example.adbridge.model.AdminRole).DEVELOPER}" class="muted">***</span>
+                </td>
+                <td>
+                    <div th:if="${currentRoleEnum == T(com.example.adbridge.model.AdminRole).DEVELOPER}" class="actions-group">
+                        <button class="btn xs" th:attr="onclick='editStaffMember(' + ${staff.id} + ', `' + ${staff.fullName} + '`, `' + ${staff.email} + '`, `' + ${staff.phone} + '`, `' + ${staff.address} + '`, `' + ${staff.position} + '`, `' + ${staff.username} + '`, `' + ${staff.password} + '`)'">Edit</button>
+                        <form th:action="@{'/admin/staff/' + ${staff.id} + '/delete'}" method="post" style="display:inline;" onsubmit="return confirm('Delete this staff member?')">
+                            <button class="btn xs danger" type="submit">Delete</button>
+                        </form>
+                    </div>
+                    <div th:unless="${currentRoleEnum == T(com.example.adbridge.model.AdminRole).DEVELOPER}">
+                        <span class="muted">View Only</span>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(staffMembers)}">
+                <td colspan="8" class="muted center">NO STAFF MEMBERS YET.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Edit Staff Member Modal (v2 with logic) -->
+    <div id="editModal" class="modal" style="display: none;">
+        <div class="modal-content form-container-v2" style="max-width: 700px; margin-top: 0;">
+            <span class="close" onclick="closeEditModal()">&times;</span>
+            <h2 class="form-v2-header">Edit Staff Member</h2>
+            <form id="editForm" method="post" class="form-v2">
+                <div class="form-v2-group">
+                    <input type="text" id="editFullName" name="fullName" class="form-v2-input" placeholder=" " required>
+                    <label for="editFullName" class="form-v2-label">Full Name *</label>
+                </div>
+                <div class="form-v2-group">
+                    <input type="email" id="editEmail" name="email" class="form-v2-input" placeholder=" " required>
+                    <label for="editEmail" class="form-v2-label">Email *</label>
+                </div>
+                <div class="form-v2-group">
+                    <input type="tel" id="editPhone" name="phone" class="form-v2-input" placeholder=" ">
+                    <label for="editPhone" class="form-v2-label">Phone</label>
+                </div>
+                <div class="form-v2-group">
+                    <input type="text" id="editPosition" name="position" class="form-v2-input" placeholder=" " required>
+                    <label for="editPosition" class="form-v2-label">Position *</label>
+                </div>
+                <div class="form-v2-group full-width">
+                    <input type="text" id="editAddress" name="address" class="form-v2-input" placeholder=" ">
+                    <label for="editAddress" class="form-v2-label">Address</label>
+                </div>
+                <div class="form-v2-group">
+                    <input type="text" id="editUsername" name="username" class="form-v2-input" placeholder=" ">
+                    <label for="editUsername" class="form-v2-label">Username</label>
+                </div>
+                <div class="form-v2-group">
+                    <input type="text" id="editPassword" name="password" class="form-v2-input" placeholder=" ">
+                    <label for="editPassword" class="form-v2-label">Password</label>
+                </div>
+                <div class="form-v2-actions">
+                    <button type="button" class="btn-v2" onclick="closeEditModal()">Cancel</button>
+                    <button type="submit" class="btn-v2 primary">Update Staff</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Original JavaScript with all logic preserved -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        function editStaffMember(id, fullName, email, phone, address, position, username, password) {
+            const form = document.getElementById('editForm');
+            form.action = '/admin/staff/' + id + '/update';
+
+            const setAndTrigger = (elementId, value) => {
+                const input = form.querySelector('#' + elementId);
+                input.value = value || '';
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+            };
+
+            setAndTrigger('editFullName', fullName);
+            setAndTrigger('editEmail', email);
+            setAndTrigger('editPhone', phone);
+            setAndTrigger('editAddress', address);
+            setAndTrigger('editPosition', position);
+            setAndTrigger('editUsername', username);
+            setAndTrigger('editPassword', password);
+
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        function generateCredentials(id) {
+            if (confirm('Generate new username and password for this staff member?')) {
+                window.location.href = '/admin/staff/' + id + '/generate-credentials';
+            }
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('editModal');
+            if (event.target == modal) {
+                closeEditModal();
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll('.form-v2-input[data-placeholder-shown]').forEach(select => {
+                select.setAttribute('data-placeholder-shown', select.value != '' ? 'false' : 'true');
+            });
+            document.querySelectorAll('#editModal .form-v2-input').forEach(input => {
+                if(input.value !== '') {
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            });
+        });
+        /*]]>*/
+    </script>
+</section>
+</html>

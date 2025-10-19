@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head">
+        <h1 class="page-title" th:text="${pageHeading}">FINANCE DASHBOARD</h1>
+    </div>
+
+
+    <!-- Tabs -->
+    <div class="tabs-container">
+        <div class="tabs">
+            <button class="tab-link active" onclick="openTab(event, 'expenses-tab')">Expenses</button>
+            <button class="tab-link" onclick="openTab(event, 'budgets-tab')">Budgets</button>
+            <button class="tab-link" onclick="openTab(event, 'add-new-tab')">+ Add New</button>
+        </div>
+
+        <!-- Expenses Tab -->
+        <div id="expenses-tab" class="tab-content active">
+            <div class="modern-search-bar">
+                <form th:action="@{/admin/finance}" method="get" class="search-form">
+                    <div class="search-input-container">
+                        <input type="text"
+                               name="q"
+                               placeholder="Search expenses..."
+                               th:value="${q}"
+                               class="pill-search-input"
+                               id="searchInput">
+                        <button type="button" class="search-clear-btn" onclick="clearSearch()" th:if="${q != null and !q.trim().isEmpty()}">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="sort-dropdown-container">
+                        <select name="category" class="sort-dropdown" onchange="this.form.submit()">
+                            <option value="">All Categories</option>
+                            <option th:each="cat : ${categoryOptions}" 
+                                    th:value="${cat}" 
+                                    th:text="${cat}" 
+                                    th:selected="${currentCategory == cat}"></option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="search-submit-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Title</th><th>Category</th><th>Amount</th><th>Date</th><th>Status</th><th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="e : ${expenses}">
+                        <td data-label="Title">
+                            <div th:text="${e.title}" class="font-semibold">Expense Title</div>
+                            <div th:if="${e.notes != null and !e.notes.isEmpty()}" th:text="${#strings.abbreviate(e.notes, 50)}" class="text-dim text-sm">Notes...</div>
+                        </td>
+                        <td data-label="Category"><span th:text="${e.category}" class="badge" th:classappend="'badge-' + ${e.category.toString().toLowerCase()}"></span></td>
+                        <td data-label="Amount" class="font-semibold" th:text="${e.amount} + ' ' + ${e.currency}">0 LKR</td>
+                        <td data-label="Date" th:text="${e.expenseDate}">2025-01-01</td>
+                        <td data-label="Status"><span class="badge" th:classappend="'approval-' + ${e.approvalStatus.toString().toLowerCase()}" th:text="${e.approvalStatus}"></span></td>
+                        <td data-label="Actions">
+                            <div class="action-buttons">
+                                <div th:if="${adminRole != null and (adminRole.name() == 'FINANCE' || adminRole.name() == 'SUPER_ADMIN')}">
+                                    <form th:if="${e.approvalStatus.name() == 'PENDING'}" th:action="@{|/admin/finance/expenses/${e.id}/approve|}" method="post"><button class="btn-v2 xs success">Approve</button></form>
+                                    <form th:if="${e.approvalStatus.name() == 'PENDING'}" th:action="@{|/admin/finance/expenses/${e.id}/reject|}" method="post"><button class="btn-v2 xs danger">Reject</button></form>
+                                </div>
+                                <div th:if="${adminRole == null || adminRole.name() != 'ADMIN' || (adminRole.name() == 'ADMIN' && e.approvalStatus.name() == 'PENDING')}">
+                                    <a th:href="@{|/admin/finance/expenses/${e.id}/edit|}" class="btn-v2 xs">Edit</a>
+                                    <form th:action="@{|/admin/finance/expenses/${e.id}/delete|}" method="post"><button class="btn-v2 xs danger">Delete</button></form>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(expenses)}"><td colspan="6" class="text-center text-dim">No expenses found.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Budgets Tab -->
+        <div id="budgets-tab" class="tab-content">
+            <div class="table-container">
+                <table class="table">
+                    <thead><tr><th>Name</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody>
+                    <tr th:each="b : ${budgets}">
+                        <td data-label="Name">
+                            <div th:text="${b.name}" class="font-semibold">Budget Name</div>
+                            <div th:if="${b.description != null and !b.description.isEmpty()}" th:text="${#strings.abbreviate(b.description, 50)}" class="text-dim text-sm">Desc...</div>
+                        </td>
+                        <td data-label="Amount" class="font-semibold" th:text="${b.amount} + ' LKR'">0 LKR</td>
+                        <td data-label="Status"><span class="badge" th:classappend="'approval-' + ${b.approvalStatus.toString().toLowerCase()}" th:text="${b.approvalStatus}"></span></td>
+                        <td data-label="Actions">
+                            <div class="action-buttons">
+                                <div th:if="${adminRole != null and (adminRole.name() == 'FINANCE' || adminRole.name() == 'SUPER_ADMIN')}">
+                                    <form th:if="${b.approvalStatus.name() == 'PENDING'}" th:action="@{|/admin/finance/budgets/${b.id}/approve|}" method="post"><button class="btn-v2 xs success">Approve</button></form>
+                                    <form th:if="${b.approvalStatus.name() == 'PENDING'}" th:action="@{|/admin/finance/budgets/${b.id}/reject|}" method="post"><button class="btn-v2 xs danger">Reject</button></form>
+                                </div>
+                                <div th:if="${adminRole == null || adminRole.name() != 'ADMIN' || (adminRole.name() == 'ADMIN' && b.approvalStatus.name() == 'PENDING')}">
+                                    <a th:href="@{|/admin/finance/budgets/${b.id}/edit|}" class="btn-v2 xs">Edit</a>
+                                    <form th:action="@{|/admin/finance/budgets/${b.id}/delete|}" method="post"><button class="btn-v2 xs danger">Delete</button></form>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(budgets)}"><td colspan="4" class="text-center text-dim">No budgets found.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Add New Tab -->
+        <div id="add-new-tab" class="tab-content">
+            <div class="add-new-grid">
+                <div class="form-container-v2">
+                    <h2 class="form-v2-header">Add New Expense</h2>
+                    <form th:action="@{/admin/finance/expenses}" th:object="${expense}" method="post" class="form-v2">
+                        <div class="form-v2-group full-width"><input type="text" th:field="*{title}" class="form-v2-input" placeholder=" " required><label class="form-v2-label">Title *</label></div>
+                        <div class="form-v2-group full-width"><textarea th:field="*{notes}" class="form-v2-input" placeholder=" " rows="3"></textarea><label class="form-v2-label">Notes</label></div>
+                        <div class="form-v2-group"><select th:field="*{category}" class="form-v2-input" required><option value="" disabled selected hidden>Select Category</option><option th:each="cat : ${categoryOptions}" th:value="${cat}" th:text="${cat}"></option></select><label class="form-v2-label">Category *</label></div>
+                        <div class="form-v2-group"><input type="number" th:field="*{amount}" min="0" step="1" class="form-v2-input" placeholder=" " required><label class="form-v2-label">Amount (LKR) *</label></div>
+                        <div class="form-v2-group"><input type="date" th:field="*{expenseDate}" class.class="form-v2-input" placeholder=" " required><label class="form-v2-label">Expense Date *</label></div>
+                        <div class="form-v2-actions"><button type="submit" class="btn-v2 primary">Add Expense</button></div>
+                    </form>
+                </div>
+                <div class="form-container-v2">
+                    <h2 class="form-v2-header">Add New Budget</h2>
+                    <form th:action="@{/admin/finance/budgets}" th:object="${budget}" method="post" class="form-v2">
+                        <div class="form-v2-group full-width"><input type="text" th:field="*{name}" class="form-v2-input" placeholder=" " required><label class="form-v2-label">Budget Name *</label></div>
+                        <div class="form-v2-group full-width"><textarea th:field="*{description}" class="form-v2-input" placeholder=" " rows="3"></textarea><label class="form-v2-label">Description</label></div>
+                        <div class="form-v2-group"><input type="number" th:field="*{amount}" min="0" step="1" class="form-v2-input" placeholder=" " required><label class="form-v2-label">Amount (LKR) *</label></div>
+                        <div class="form-v2-actions"><button type="submit" class="btn-v2 primary">Add Budget</button></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="admin-footer-sticky">© 2025 AdBridgeLanka · Admin</footer>
+
+    <script>
+        // JS for tab functionality
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) { tabcontent[i].style.display = "none"; }
+            tablinks = document.getElementsByClassName("tab-link");
+            for (i = 0; i < tablinks.length; i++) { tablinks[i].className = tablinks[i].className.replace(" active", ""); }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        // Initialize the first tab
+        document.addEventListener('DOMContentLoaded', () => { document.querySelector('.tab-link').click(); });
+        
+        // Clear search function
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.querySelector('select[name="category"]').value = '';
+            document.querySelector('.search-form').submit();
+        }
+    </script>
+
+    <style>
+        /* Component Styles */
+
+        .tabs-container { background: var(--bg-alt); border-radius: var(--radius); border: 1px solid var(--border); }
+        .tabs { display: flex; border-bottom: 1px solid var(--border); padding: .5rem .5rem 0 .5rem; }
+        .tab-link { background: transparent; border: none; padding: .75rem 1.25rem; cursor: pointer; color: var(--text-dim); font-weight: 600; border-bottom: 2px solid transparent; }
+        .tab-link.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+        .tab-content { padding: 1.5rem; display: none; }
+        .tab-content.active { display: block; }
+
+        .filter-form-container { margin-bottom: 1.5rem; }
+        .filter-form { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; }
+        .filter-form input, .filter-form select { padding: .75rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--text); }
+
+        .add-new-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+
+        /* Badge Styles */
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; }
+        .badge-media_buy { background-color: #e3f2fd; color: #1976d2; }
+        .badge-production { background-color: #f3e5f5; color: #7b1fa2; }
+        .badge-salary { background-color: #e8f5e8; color: #388e3c; }
+        .badge-software { background-color: #fff3e0; color: #f57c00; }
+        .badge-travel { background-color: #e0f2f1; color: #00695c; }
+        .badge-other { background-color: #f5f5f5; color: #616161; }
+        .approval-pending { background-color: #f39c12; color: white; }
+        .approval-approved { background-color: #27ae60; color: white; }
+        .approval-rejected { background-color: #e74c3c; color: white; }
+
+        /* Utility Classes */
+        .font-semibold { font-weight: 600; }
+        .text-dim { color: var(--text-dim); }
+        .text-sm { font-size: .9em; }
+        .text-center { text-align: center; }
+        .action-buttons { 
+            display: flex; 
+            gap: .5rem; 
+            flex-wrap: nowrap; 
+            align-items: center;
+            justify-content: flex-start;
+        }
+        
+        .action-buttons form {
+            display: inline-block;
+            margin: 0;
+        }
+        
+        .action-buttons .btn-v2 {
+            margin: 0;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            min-width: auto;
+        }
+
+        @media (max-width: 992px) { .add-new-grid { grid-template-columns: 1fr; } }
+    </style>
+</section>
+</html>

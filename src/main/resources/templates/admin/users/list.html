@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head" style="display:flex;justify-content:space-between;gap:1rem;align-items:center;">
+        <h1 class="page-title" th:text="${pageHeading}">USERS</h1>
+        <a class="btn primary" th:href="@{/admin/users/new}"
+           th:if="${adminRole != null and (adminRole.name() == 'ADMIN' or adminRole.name() == 'SUPER_ADMIN')}">+ New User</a>
+    </div>
+
+    <div th:if="${flashMsg}" class="alert success" th:text="${flashMsg}"></div>
+    <div th:if="${errorMsg}" class="alert danger" th:text="${errorMsg}"></div>
+
+    <div class="card">
+        <div style="display:flex;justify-content:flex-end;gap:.5rem;margin-bottom:.6rem;">
+            <form th:action="@{/admin/users}" method="get">
+                <input type="text" name="search" placeholder="Search users..." th:value="${search}">
+                <button class="btn" type="submit">Search</button>
+            </form>
+            <a class="btn" th:href="@{/admin/users}">Clear</a>
+        </div>
+        
+        <table class="table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Full Name</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Company</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="user : ${users}">
+                <td th:text="${user.id}">1</td>
+                <td th:text="${user.fullName}">John Doe</td>
+                <td th:text="${user.username}">johndoe</td>
+                <td th:text="${user.email}">john@example.com</td>
+                <td th:text="${user.phone}">+94 77 123 4567</td>
+                <td th:text="${user.companyName}">ABC Company</td>
+                <td>
+                    <span th:text="${user.status}" 
+                          th:class="'badge ' + (${user.status} == 'ACTIVE' ? 'green' : 'red')">ACTIVE</span>
+                </td>
+                <td th:text="${user.createdAt}">2025-01-01</td>
+                <td>
+                    <a th:href="@{'/admin/users/' + ${user.id}}" class="btn xs">View</a>
+                    <span th:if="${adminRole != null and (adminRole.name() == 'ADMIN' or adminRole.name() == 'SUPER_ADMIN')}">
+                        <a th:href="@{'/admin/users/' + ${user.id} + '/edit'}" class="btn xs">Edit</a>
+                        <form th:action="@{'/admin/users/' + ${user.id} + '/delete'}" method="post"
+                              style="display:inline" onsubmit="return confirm('Delete this user?')">
+                            <button type="submit" class="btn xs danger">Delete</button>
+                        </form>
+                    </span>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(users)}">
+                <td colspan="9" class="muted center">NO USERS YET.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <footer class="admin-footer-sticky">
+        © 2025 AdBridgeLanka · Admin
+    </footer>
+</section>
+</html>
+

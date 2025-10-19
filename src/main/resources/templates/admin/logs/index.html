@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head">
+        <h1 class="page-title" th:text="${pageHeading}">LOGS</h1>
+    </div>
+
+    <div class="card" style="max-height:60vh; overflow:auto;">
+        <pre style="white-space:pre-wrap; font-size:.8rem; line-height:1.4;" th:each="l : ${logLines}" th:text="${l}">log line</pre>
+    </div>
+
+    <footer class="admin-footer-sticky">
+        © 2025 AdBridgeLanka · Admin
+    </footer>
+</section>
+</html>
+
+
+
+
+

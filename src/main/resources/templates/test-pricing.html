@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Pricing - AdBridge</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .price { color: #ff6b35; font-weight: bold; font-size: 1.2em; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Pricing Test Results</h1>
+    
+    <div class="test-result">
+        <h3>📻 Radio Promotion Test</h3>
+        <p>Morning slot, 15 seconds, 10 plays</p>
+        <p class="price">Expected: Rs. 20,000 | Actual: Rs. <span th:text="${radioPrice}">0</span></p>
+    </div>
+    
+    <div class="test-result">
+        <h3>📺 TV Advertisement Test</h3>
+        <p>Evening slot, 30 seconds, 7 days</p>
+        <p class="price">Expected: Rs. 189,000 | Actual: Rs. <span th:text="${tvPrice}">0</span></p>
+    </div>
+    
+    <div class="test-result">
+        <h3>📱 Social Media Test</h3>
+        <p>Facebook + Instagram, Video content, 14 days</p>
+        <p class="price">Expected: Rs. 11,000 | Actual: Rs. <span th:text="${socialPrice}">0</span></p>
+    </div>
+    
+    <p><a href="/book">← Back to Booking</a></p>
+</body>
+</html>

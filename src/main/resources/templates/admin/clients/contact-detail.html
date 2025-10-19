@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head">
+        <h1 class="page-title" th:text="${pageHeading}">CONTACT MESSAGE</h1>
+        <a class="btn" th:href="@{/admin/clients}">Back to Clients</a>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+            <h3 style="margin:0;">Message Details</h3>
+            <div>
+                <span th:if="${!contact.isReplied}" class="badge unread">UNREAD</span>
+                <span th:if="${contact.isRead and !contact.isReplied}" class="badge read">READ</span>
+                <span th:if="${contact.isReplied}" class="badge replied">REPLIED</span>
+            </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+                <div><strong>Name:</strong> <span th:text="${contact.name}">Name</span></div>
+                <div><strong>Email:</strong> <span th:text="${contact.email}">email</span></div>
+                <div><strong>Phone:</strong> <span th:text="${contact.phone}">phone</span></div>
+            </div>
+            <div>
+                <div><strong>Subject:</strong> <span th:text="${contact.subject}">subject</span></div>
+                <div><strong>Date:</strong> <span th:text="${#temporals.format(contact.createdAt, 'MMM dd, yyyy HH:mm')}">Jan 15, 2025</span></div>
+                <div><strong>Status:</strong> 
+                    <span th:if="${!contact.isReplied}" class="badge unread">UNREAD</span>
+                    <span th:if="${contact.isRead and !contact.isReplied}" class="badge read">READ</span>
+                    <span th:if="${contact.isReplied}" class="badge replied">REPLIED</span>
+                </div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 1rem; padding: 1rem; background-color: #f8f9fa; border-radius: 4px;">
+            <strong>Message:</strong>
+            <div th:text="${contact.message}" style="margin-top: 0.5rem; white-space: pre-wrap;"></div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="card" style="margin-top:1rem;">
+        <h3 style="margin:0 0 .6rem 0;">Actions</h3>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <a th:if="${!contact.isReplied}" class="btn primary" 
+               th:href="@{'/admin/clients/contact/' + ${contact.id} + '/create-client'}">
+                Create New Client
+            </a>
+            <form th:if="${!contact.isReplied}" th:action="@{'/admin/clients/contact/' + ${contact.id} + '/mark-replied'}" 
+                  method="post" style="display:inline;">
+                <button class="btn" type="submit" onclick="return confirm('Mark this contact as replied?')">
+                    Mark as Replied
+                </button>
+            </form>
+            <a class="btn" th:href="@{'mailto:' + ${contact.email} + '?subject=Re: ' + ${contact.subject}}">
+                Reply via Email
+            </a>
+        </div>
+    </div>
+
+    <footer class="admin-footer-sticky">
+        © 2025 AdBridgeLanka · Admin
+    </footer>
+    
+    <style>
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge.unread {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .badge.read {
+            background-color: #3498db;
+            color: white;
+        }
+        .badge.replied {
+            background-color: #27ae60;
+            color: white;
+        }
+    </style>
+</section>
+</html>
+
+
+
+
+
+
+
+
+
+
+

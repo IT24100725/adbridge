@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head">
+        <h1 class="page-title" th:text="${pageHeading}">EDIT DOCUMENT</h1>
+    </div>
+
+    <div th:if="${flashMsg}" class="alert success" th:text="${flashMsg}"></div>
+    <div th:if="${errorMsg}" class="alert danger" th:text="${errorMsg}"></div>
+
+    <div class="form-container-v2">
+        <h2 class="form-v2-header">Edit Document</h2>
+        <form th:action="@{'/admin/documents/' + ${document.id} + '/edit'}" method="post" enctype="multipart/form-data" class="form-v2">
+            <div class="form-v2-group full-width">
+                <input type="text" id="title" name="title" required th:value="${document.title}" class="form-v2-input" placeholder=" ">
+                <label for="title" class="form-v2-label">Document Title *</label>
+            </div>
+
+            <div class="form-v2-group full-width">
+                <textarea id="description" name="description" rows="3" th:text="${document.description}" class="form-v2-input" placeholder=" "></textarea>
+                <label for="description" class="form-v2-label">Description</label>
+            </div>
+
+            <div class="form-v2-group">
+                <select id="category" name="category" required class="form-v2-input">
+                    <option value="" disabled selected hidden>Select Category</option>
+                    <option value="CONTRACT" th:selected="${document.category == 'CONTRACT'}">Contract</option>
+                    <option value="INVOICE" th:selected="${document.category == 'INVOICE'}">Invoice</option>
+                    <option value="REPORT" th:selected="${document.category == 'REPORT'}">Report</option>
+                    <option value="PRESENTATION" th:selected="${document.category == 'PRESENTATION'}">Presentation</option>
+                    <option value="OTHER" th:selected="${document.category == 'OTHER'}">Other</option>
+                </select>
+                <label for="category" class="form-v2-label">Category *</label>
+            </div>
+
+            <div class="form-v2-group full-width">
+                <input type="file" id="file" name="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png" class="form-v2-input">
+                <label for="file" class="form-v2-label">Upload New File (Optional)</label>
+                <small class="form-v2-help">Leave empty to keep current file. Supported formats: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, JPG, PNG</small>
+                <div class="current-file" style="margin-top: 0.5rem; padding: 0.75rem; background: var(--bg-alt); border-radius: var(--radius); border: 1px solid var(--border);">
+                    <strong>Current file:</strong> <span th:text="${document.originalFilename}">document.pdf</span>
+                    <small class="text-dim">(<span th:text="${#numbers.formatDecimal(document.fileSize / 1024.0 / 1024.0, 1, 1)} + ' MB'">2.5 MB</span>)</small>
+                </div>
+            </div>
+
+            <div class="form-v2-group full-width">
+                <div class="checkbox-container">
+                    <input type="checkbox" id="isPublic" name="isPublic" th:checked="${document.isPublic}" class="form-v2-checkbox">
+                    <label for="isPublic" class="form-v2-checkbox-label">Make this document public (visible to all users)</label>
+                </div>
+            </div>
+
+            <div class="form-v2-actions">
+                <button type="submit" class="btn-v2 primary">Update Document</button>
+                <a th:href="@{/admin/documents}" class="btn-v2">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <footer class="admin-footer-sticky">
+        © 2025 AdBridgeLanka · Admin
+    </footer>
+
+    <style>
+        .form-v2-help {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-top: 0.25rem;
+            display: block;
+        }
+        
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .form-v2-checkbox {
+            width: auto;
+            margin: 0;
+        }
+        
+        .form-v2-checkbox-label {
+            font-size: 0.9rem;
+            color: var(--text);
+            cursor: pointer;
+            margin: 0;
+        }
+        
+        .current-file {
+            font-size: 0.9rem;
+        }
+        
+        .text-dim {
+            color: var(--text-dim);
+        }
+    </style>
+</section>
+</html>
+
+
+
+
+

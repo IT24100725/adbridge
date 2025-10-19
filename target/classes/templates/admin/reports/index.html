@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head">
+        <h1 class="page-title" th:text="${pageHeading}">REPORTS</h1>
+    </div>
+
+    <!-- Report Filters Section -->
+    <div class="form-container-v2" style="margin-bottom: 2rem;">
+        <form th:action="@{/admin/reports}" method="get" class="form-v2 filter-bar">
+            <div class="form-v2-group">
+                <input type="date" id="dateFrom" name="dateFrom" th:value="${dateFrom}" class="form-v2-input" placeholder=" ">
+                <label for="dateFrom" class="form-v2-label">From Date</label>
+            </div>
+            <div class="form-v2-group">
+                <input type="date" id="dateTo" name="dateTo" th:value="${dateTo}" class="form-v2-input" placeholder=" ">
+                <label for="dateTo" class="form-v2-label">To Date</label>
+            </div>
+            <div class="form-v2-group">
+                <select id="reportType" name="reportType" class="form-v2-input">
+                    <option value="" disabled selected hidden>Select Report Type</option>
+                    <option value="revenue" th:selected="${reportType == 'revenue'}">Revenue Report</option>
+                    <option value="campaigns" th:selected="${reportType == 'campaigns'}">Campaign Performance</option>
+                    <option value="tasks" th:selected="${reportType == 'tasks'}">Task Progress</option>
+                    <option value="users" th:selected="${reportType == 'users'}">User Activity</option>
+                    <option value="payments" th:selected="${reportType == 'payments'}">Payment Trends</option>
+                    <option value="clients" th:selected="${reportType == 'clients'}">Client Report</option>
+                </select>
+                <label for="reportType" class="form-v2-label">Report Type</label>
+            </div>
+            <div class="form-v2-actions">
+                <button type="submit" class="btn-v2 primary">Generate</button>
+                <a th:href="@{/admin/reports}" class="btn-v2">Reset</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Generated Report Results Section -->
+    <div th:if="${reportGenerated}" class="report-card">
+        <div class="report-header">
+            <h2 class="report-title" th:text="${reportType.substring(0,1).toUpperCase() + reportType.substring(1)} + ' Report'">Generated Report</h2>
+            <div class="report-meta">
+                <span class="meta-item" th:text="${#temporals.format(startDate, 'dd MMM yyyy')} + ' - ' + ${#temporals.format(endDate, 'dd MMM yyyy')}"></span>
+                <a th:href="@{/admin/reports/download/{type}(type=${reportType}, dateFrom=${dateFrom}, dateTo=${dateTo})}" class="btn-v2 xs primary" target="_blank">Download PDF</a>
+            </div>
+        </div>
+        <div class="report-body">
+            <!-- Revenue -->
+            <div th:if="${reportType == 'revenue'}">
+                <div class="report-grid">
+                    <div class="metric-card highlight"><div class="metric-label">Total Revenue</div><div class="metric-value" th:text="${monthlyRevenue.totalRevenue} + ' LKR'"></div></div>
+                    <div class="metric-card"><div class="metric-label">Current Period</div><div class="metric-value" th:text="${monthlyRevenue.currentPeriod} + ' LKR'"></div></div>
+                    <div class="metric-card"><div class="metric-label">Previous Period</div><div class="metric-value" th:text="${monthlyRevenue.previousPeriod} + ' LKR'"></div></div>
+                    <div class="metric-card"><div class="metric-label">Growth Rate</div><div class="metric-value" th:classappend="${monthlyRevenue.growthDirection == 'up'} ? 'trend-up' : 'trend-down'" th:text="${#numbers.formatDecimal(monthlyRevenue.growthRate, 1, 1)} + '%'"></div></div>
+                </div>
+                <div class="report-details-table">
+                    <table class="table">
+                        <thead><tr><th>Date</th><th>Description</th><th>Amount</th></tr></thead>
+                        <tbody>
+                        <tr th:each="detail : ${revenueDetails}">
+                            <td th:text="${#temporals.format(detail.createdAt, 'dd MMM yyyy')}"></td>
+                            <td th:text="'Payment for Booking ID: ' + ${detail.bookingId}"></td>
+                            <td th:text="${detail.amount} + ' LKR'"></td>
+                        </tr>
+                        <tr th:if="${revenueDetails == null or #lists.isEmpty(revenueDetails)}">
+                            <td colspan="3" class="text-center text-dim">No detailed revenue data available for this period.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- Campaigns -->
+            <div th:if="${reportType == 'campaigns'}">
+                <div class="report-grid">
+                    <div class="metric-card highlight"><div class="metric-label">Total Campaigns</div><div class="metric-value" th:text="${campaignPerformance.totalCampaigns}"></div></div>
+                    <div class="metric-card"><div class="metric-label">Approved</div><div class="metric-value" th:text="${campaignPerformance.approvedCampaigns}"></div></div>
+                    <div class="metric-card"><div class="metric-label">Pending</div><div class="metric-value" th:text="${campaignPerformance.pendingCampaigns}"></div></div>
+                    <div class="metric-card"><div class="metric-label">Approval Rate</div><div class="metric-value" th:text="${#numbers.formatDecimal(campaignPerformance.approvalRate, 1, 1)} + '%'"></div></div>
+                </div>
+                <div class="report-details-table">
+                    <table class="table">
+                        <thead><tr><th>Client Name</th><th>Service</th><th>Status</th><th>Last Updated</th></tr></thead>
+                        <tbody>
+                        <tr th:each="detail : ${campaignDetails}">
+                            <td th:text="${detail.fullName}"></td>
+                            <td th:text="${detail.serviceType}"></td>
+                            <td th:text="${detail.campaignStatus}"></td>
+                            <td th:text="${#temporals.format(detail.lastModifiedAt, 'dd MMM yyyy')}"></td>
+                        </tr>
+                        <tr th:if="${campaignDetails == null or #lists.isEmpty(campaignDetails)}">
+                            <td colspan="4" class="text-center text-dim">No detailed campaign data available for this period.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- Tasks -->
+            <div th:if="${reportType == 'tasks'}">
+                <div class="report-grid">
+                    <div class="metric-card highlight"><div class="metric-label">Total Tasks</div><div class="metric-value" th:text="${taskProgress.totalTasks}"></div></div>
+                    <div class="metric-card"><div class="metric-label">Completed</div><div class="metric-value" th:text="${taskProgress.completedTasks}"></div></div>
+                    <div class="metric-card"><div class="metric-label">In Progress</div><div class="metric-value" th:text="${taskProgress.inProgressTasks}"></div></div>
+                    <div class="metric-card"><div class="metric-label">Completion Rate</div><div class="metric-value" th:text="${#numbers.formatDecimal(taskProgress.completionRate, 1, 1)} + '%'"></div></div>
+                </div>
+                <div class="report-details-table">
+                    <table class="table">
+                        <thead><tr><th>Title</th><th>Assigned To</th><th>Status</th><th>Due Date</th></tr></thead>
+                        <tbody>
+                        <tr th:each="detail : ${taskDetails}">
+                            <td th:text="${detail.title}"></td>
+                            <td th:text="${detail.assignedTo}"></td>
+                            <td th:text="${detail.status}"></td>
+                            <td th:text="${#temporals.format(detail.dueDate, 'dd MMM yyyy')}"></td>
+                        </tr>
+                        <tr th:if="${taskDetails == null or #lists.isEmpty(taskDetails)}">
+                            <td colspan="4" class="text-center text-dim">No detailed task data available for this period.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- Users -->
+            <div th:if="${reportType == 'users'}">
+                <div class="report-grid">
+                    <div class="metric-card highlight"><div class="metric-label">Total Users</div><div class="metric-value" th:text="${userActivity.totalUsers}"></div></div>
+                    <div class="metric-card"><div class="metric-label">Active Users</div><div class="metric-value" th:text="${userActivity.activeUsers}"></div></div>
+                    <div class="metric-card"><div class="metric-label">New Users</div><div class="metric-value" th:text="${userActivity.newUsers}"></div></div>
+                    <div class="metric-card"><div class="metric-label">Activity Rate</div><div class="metric-value" th:text="${#numbers.formatDecimal(userActivity.activityRate, 1, 1)} + '%'"></div></div>
+                </div>
+                <div class="report-details-table">
+                    <table class="table">
+                        <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Status</th></tr></thead>
+                        <tbody>
+                        <tr th:each="detail : ${userDetails}">
+                            <td th:text="${detail.fullName}"></td>
+                            <td th:text="${detail.email}"></td>
+                            <td th:text="${detail.phone}"></td>
+                            <td th:text="${detail.status}"></td>
+                        </tr>
+                        <tr th:if="${userDetails == null or #lists.isEmpty(userDetails)}">
+                            <td colspan="4" class="text-center text-dim">No detailed user data available for this period.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- Payments -->
+            <div th:if="${reportType == 'payments'}">
+                <div class="report-grid">
+                    <div class="metric-card highlight"><div class="metric-label">Total Payments</div><div class="metric-value" th:text="${paymentTrends.totalPayments}"></div></div>
+                    <div class="metric-card"><div class="metric-label">Successful</div><div class="metric-value" th:text="${paymentTrends.successfulPayments}"></div></div>
+                    <div class="metric-card"><div class="metric-label">Success Rate</div><div class="metric-value" th:text="${#numbers.formatDecimal(paymentTrends.successRate, 1, 1)} + '%'"></div></div>
+                    <div class="metric-card"><div class="metric-label">Avg. Amount</div><div class="metric-value" th:text="${#numbers.formatDecimal(paymentTrends.avgPaymentAmount, 0, 0)} + ' LKR'"></div></div>
+                </div>
+                <div class="report-details-table">
+                    <table class="table">
+                        <thead><tr><th>Payment ID</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
+                        <tbody>
+                        <tr th:each="detail : ${paymentDetails}">
+                            <td th:text="${detail.paymentId}"></td>
+                            <td th:text="${detail.amount} + ' LKR'"></td>
+                            <td th:text="${#temporals.format(detail.createdAt, 'dd MMM yyyy')}"></td>
+                            <td th:text="${detail.paymentStatus}"></td>
+                        </tr>
+                        <tr th:if="${paymentDetails == null or #lists.isEmpty(paymentDetails)}">
+                            <td colspan="4" class="text-center text-dim">No detailed payment data available for this period.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- Clients -->
+            <div th:if="${reportType == 'clients'}">
+                <div class="report-details-table">
+                    <table class="table">
+                        <thead><tr><th>Client Name</th><th>Total Campaigns</th><th>Total Spent</th><th>Favorite Service</th><th>Last Campaign Date</th></tr></thead>
+                        <tbody>
+                        <tr th:each="detail : ${clientDetails}">
+                            <td th:text="${detail.clientName}"></td>
+                            <td th:text="${detail.totalCampaigns}"></td>
+                            <td th:text="${detail.totalSpent} + ' LKR'"></td>
+                            <td th:text="${detail.favoriteService}"></td>
+                            <td th:text="${detail.lastCampaignDate != null ? #temporals.format(detail.lastCampaignDate, 'dd MMM yyyy') : 'N/A'}"></td>
+                        </tr>
+                        <tr th:if="${clientDetails == null or #lists.isEmpty(clientDetails)}">
+                            <td colspan="5" class="text-center text-dim">No detailed client data available for this period.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Placeholder for when no report is generated -->
+    <div th:unless="${reportGenerated}" class="placeholder-container">
+        <div class="placeholder-icon">📈</div>
+        <h2 class="placeholder-title">Select a report to get started</h2>
+        <p class="placeholder-text">Use the filters above to generate and view detailed reports.</p>
+    </div>
+
+    <!-- Financial Reports Section -->
+    <div class="report-card" style="margin-top: 2rem;">
+        <div class="report-header">
+            <h2 class="report-title">Financial Reports</h2>
+            <div class="report-meta">
+                <a th:href="@{/admin/reports/financial}" class="btn-v2 xs">View Details</a>
+                <a th:href="@{/admin/reports/financial/csv}" class="btn-v2 xs">Download CSV</a>
+                <a th:href="@{/admin/reports/financial/pdf}" class="btn-v2 xs">Download PDF</a>
+            </div>
+        </div>
+        <div class="report-body">
+            <p class="text-dim">Generate consolidated reports for all approved budgets and and expenses within a specified date range.</p>
+        </div>
+    </div>
+
+    <footer class="admin-footer-sticky">© 2025 AdBridgeLanka · Admin</footer>
+
+    <style>
+        .filter-bar { flex-direction: row; align-items: flex-end; gap: 1rem; flex-wrap: wrap; }
+        .filter-bar .form-v2-group { flex: 1 1 180px; }
+        .filter-bar .form-v2-actions { margin-bottom: .6rem; }
+
+        .report-card { background-color: var(--bg-alt); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+        .report-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); }
+        .report-title { font-size: 1.25rem; color: var(--text-heading); margin: 0; }
+        .report-meta { display: flex; align-items: center; gap: 1rem; }
+        .meta-item { font-size: 0.9rem; color: var(--text-dim); }
+        .report-body { padding: 1.5rem; }
+
+        .report-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
+        .metric-card { background-color: var(--bg); padding: 1.5rem; border-radius: var(--radius); text-align: center; border: 1px solid var(--border-alt); }
+        .metric-card.highlight { background-color: var(--accent-bg-faded); border-color: var(--accent-faded); }
+        .metric-label { font-size: 0.85rem; color: var(--text-dim); text-transform: uppercase; margin-bottom: 0.75rem; }
+        .metric-value { font-size: 1.75rem; font-weight: 700; color: var(--text-heading); }
+        .metric-card.highlight .metric-value { color: var(--accent); }
+        .trend-up { color: #28a745; }
+        .trend-down { color: #dc3545; }
+
+        .placeholder-container { text-align: center; padding: 4rem 2rem; background-color: var(--bg-alt); border: 1px solid var(--border); border-radius: var(--radius); margin-top: 2rem; }
+        .placeholder-icon { font-size: 4rem; margin-bottom: 1rem; opacity: 0.5; }
+        .placeholder-title { font-size: 1.5rem; color: var(--text-heading); margin-bottom: 0.5rem; }
+        .placeholder-text { color: var(--text-dim); max-width: 400px; margin: 0 auto; }
+
+        .text-dim { color: var(--text-dim); }
+
+        .report-details-table { margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1.5rem; }
+        .report-details-table .table { width: 100%; border-collapse: collapse; }
+        .report-details-table .table th, .report-details-table .table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-alt); text-align: left; }
+        .report-details-table .table th { font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; font-weight: 600; }
+        .report-details-table .table td { font-size: 0.9rem; }
+        .text-center { text-align: center; }
+
+    </style>
+</section>
+</html>

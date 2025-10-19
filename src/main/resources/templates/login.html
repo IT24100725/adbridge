@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::content})}">
+<th:block th:fragment="content">
+  <section class="section" style="min-height:calc(100vh - 70px);display:flex;justify-content:center;align-items:flex-start;">
+    <div class="auth-box" style="max-width:500px;margin:2rem auto;">
+      <!-- Use navbar logo style -->
+      <div style="text-align:center;margin-bottom:1.2rem;">
+        <div class="logo" style="font-size:1.4rem;">Ad<span>BridgeLanka</span></div>
+      </div>
+      
+      <h2 th:text="${title}" style="font-family:serif;font-size:1.5rem;text-align:center;margin-bottom:0.5rem;color:var(--text);"></h2>
+      <p th:text="${subtitle}" style="text-align:center;color:var(--text-dim);font-size:0.9rem;margin-bottom:2rem;"></p>
+      
+      <div th:if="${error}" class="error-message" style="background:rgba(255,0,0,0.1);border:1px solid rgba(255,0,0,0.3);color:#ff4444;padding:0.75rem;border-radius:var(--radius);margin-bottom:1rem;font-size:0.8rem;">
+        <span th:text="${error}"></span>
+      </div>
+      
+      <form method="post" th:action="@{/login}">
+        <input type="hidden" name="next" th:value="${next}">
+        <div class="field">
+          <label>Username</label>
+          <input name="username" type="text" placeholder="Enter your username" required>
+        </div>
+        
+        <div class="field">
+          <label>Password</label>
+          <input type="password" name="password" placeholder="Enter your password" required>
+        </div>
+        
+        <div style="margin-top:1.6rem;text-align:center;">
+          <a href="#" class="link-underline submit-link" onclick="this.closest('form').submit();return false;">Sign In</a>
+        </div>
+        
+        <div style="margin-top:1.5rem;text-align:center;">
+          <p style="color:var(--text-dim);font-size:0.8rem;margin:0;">
+            Don't have an account? 
+            <a th:href="@{/register}" class="form-link" style="color:var(--accent);text-decoration:none;font-weight:500;">Sign up</a>
+          </p>
+        </div>
+        
+        <div style="margin-top:1rem;text-align:center;">
+          <a th:href="@{/}" class="form-link" style="color:var(--text-dim);text-decoration:none;font-size:0.8rem;">← Back Home</a>
+        </div>
+      </form>
+    </div>
+  </section>
+</th:block>
+</html>

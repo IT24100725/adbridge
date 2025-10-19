@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::content})}">
+<th:block th:fragment="content">
+
+    <!-- HERO -->
+    <section id="hero" class="hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="tagline">IDEATE · EXECUTE · ANALYSE</div>
+            <h1 class="brand-name">ADBRIDGELANKA</h1>
+            <p class="subtitle">A PERFORMANCE‑FOCUSED DIGITAL AD PLATFORM</p>
+        </div>
+    </section>
+
+    <!-- SERVICES -->
+    <section id="services" class="section">
+        <div class="section-head">
+            <h2>Services</h2>
+            <p>Discover what we offer to grow your reach.</p>
+        </div>
+        <div class="cards cards-3cols">
+            <a class="card" th:href="@{/services} + '#svc-tv'"><h3>TV Advertisement</h3><p>Broadcast on top TV channels.</p></a>
+            <a class="card" th:href="@{/services} + '#svc-radio'"><h3>Radio Promotion</h3><p>Reach audiences on FM radio.</p></a>
+            <a class="card" th:href="@{/services} + '#svc-social'"><h3>Social Media Campaign</h3><p>Facebook, Instagram, TikTok, YouTube.</p></a>
+            <a class="card" th:href="@{/services} + '#svc-newspaper'"><h3>Newspaper Ad</h3><p>Place ads in leading newspapers.</p></a>
+            <a class="card" th:href="@{/services} + '#svc-billboard'"><h3>Billboard Advertising</h3><p>High-visibility outdoor ads.</p></a>
+            <a class="card" th:href="@{/services} + '#svc-banner'"><h3>Digital Banner</h3><p>Display ads on websites/apps.</p></a>
+        </div>
+        <div class="section-cta">
+            <a th:href="@{/services}" class="link-underline">Explore Services</a>
+        </div>
+    </section>
+
+    <!-- PROCESS -->
+    <section id="process" class="section alt">
+        <div class="section-head">
+            <h2>Process</h2>
+            <p>Explain process...</p>
+        </div>
+    </section>
+
+    <!-- TEAM (EXACT 2 ROWS × 3 COLS) -->
+    <section id="team" class="section">
+        <div class="section-head">
+            <h2>OUR TEAM</h2>
+            <p>A MULTI‑DISCIPLINARY CORE GROUP DRIVING ADBRIDGELANKA FORWARD.</p>
+        </div>
+
+        <div class="team-six-grid">
+            <div class="team-card">
+                <div class="team-avatar" title="Managing Director">M</div>
+                <h4 class="team-name">MENURA</h4>
+                <p class="team-role">MANAGING DIRECTOR</p>
+            </div>
+            <div class="team-card female">
+                <div class="team-avatar female" title="Marketing Planner">D</div>
+                <h4 class="team-name">DIVYA</h4>
+                <p class="team-role">MARKETING PLANNER</p>
+            </div>
+            <div class="team-card">
+                <div class="team-avatar" title="Client Support Officer">V</div>
+                <h4 class="team-name">VENURA</h4>
+                <p class="team-role">CLIENT SUPPORT OFFICER</p>
+            </div>
+            <div class="team-card">
+                <div class="team-avatar" title="Senior Web Developer">L</div>
+                <h4 class="team-name">LASITHA</h4>
+                <p class="team-role">SENIOR WEB DEVELOPER</p>
+            </div>
+            <div class="team-card">
+                <div class="team-avatar" title="Finance Coordinator">O</div>
+                <h4 class="team-name">OSHAN</h4>
+                <p class="team-role">FINANCE COORDINATOR</p>
+            </div>
+            <div class="team-card">
+                <div class="team-avatar" title="Admin Assistant">R</div>
+                <h4 class="team-name">RAMITHA</h4>
+                <p class="team-role">ADMIN ASSISTANT</p>
+            </div>
+        </div>
+
+        <div class="team-admin-center">
+            <a th:href="@{/admin/login}" class="team-admin-link">
+                <span class="team-admin-lock" aria-hidden="true"></span>
+                <span>ADMIN ACCESS PORTAL</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- CLIENTS -->
+    <section id="clients" class="section alt">
+        <div class="section-head">
+            <h2>Clients</h2>
+            <p>Clients intro...</p>
+        </div>
+    </section>
+
+
+</th:block>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head">
+        <h1 class="page-title" th:text="${pageHeading}">SETTINGS</h1>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+    <div th:if="${integrationHelp}" class="alert" style="margin:.3rem 0;color:#cfd5d6;" th:text="${integrationHelp}"></div>
+
+    <!-- Staff Management Link -->
+    <div class="card" style="margin-bottom:1rem;">
+        <h3 style="margin:0 0 .8rem 0;">Staff Management</h3>
+        <p>Manage staff members, roles, and credentials.</p>
+        <a href="/admin/staff" class="btn primary">Manage Staff Members</a>
+    </div>
+
+    <footer class="admin-footer-sticky">
+        © 2025 AdBridgeLanka · Admin
+    </footer>
+</section>
+</html>
+
+

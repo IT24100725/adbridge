@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head" style="display:flex; align-items:center; justify-content:space-between;">
+        <h1 class="page-title" th:text="${ticket.id != null ? 'Edit Support Request' : 'New Support Request'}">New Support Request</h1>
+        <a class="btn" th:href="@{/admin/support}">Back to List</a>
+    </div>
+
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <div class="form-container-v2">
+        <h2 class="form-v2-header" th:text="${ticket.id != null ? 'Update Ticket Details' : 'Create a New Ticket'}">Create a New Ticket</h2>
+        <form th:action="${ticket.id != null ? '/admin/support/' + ticket.id : '/admin/support'}" th:object="${ticket}" method="post" class="form-v2" enctype="multipart/form-data">
+
+            <div class="form-v2-group">
+                <input type="text" id="clientName" name="clientName" class="form-v2-input" placeholder=" " required
+                       th:readonly="${adminRole != null and adminRole.name() == 'ADMIN'}"
+                       th:value="${prefillClientName}">
+                <label for="clientName" class="form-v2-label">Client Name *</label>
+            </div>
+
+            <div class="form-v2-group">
+                <input type="email" id="clientEmail" name="clientEmail" class="form-v2-input" placeholder=" " required
+                       th:readonly="${adminRole != null and adminRole.name() == 'ADMIN'}"
+                       th:value="${prefillClientEmail}">
+                <label for="clientEmail" class="form-v2-label">Client Email *</label>
+            </div>
+
+            <div class="form-v2-group full-width">
+                <input type="text" id="subject" name="subject" class="form-v2-input" placeholder=" "
+                       th:readonly="${adminRole != null and adminRole.name() == 'ADMIN'}"
+                       th:value="${prefillSubject}">
+                <label for="subject" class="form-v2-label">Subject</label>
+            </div>
+
+            <div class="form-v2-group full-width">
+                <textarea id="message" name="message" class="form-v2-input" placeholder=" " rows="4"
+                          th:readonly="${adminRole != null and adminRole.name() == 'ADMIN'}"
+                          th:text="${prefillMessage}"></textarea>
+                <label for="message" class="form-v2-label">Message</label>
+            </div>
+
+            <div class="form-v2-group">
+                <select id="priority" th:field="*{priority}" class="form-v2-input"
+                        th:disabled="${adminRole != null and adminRole.name() == 'ADMIN'}" onchange="this.setAttribute('data-placeholder-shown', this.value != '' ? 'false' : 'true');">
+                    <option value="" disabled selected hidden>Select Priority</option>
+                    <option value="LOW">LOW</option>
+                    <option value="MEDIUM">MEDIUM</option>
+                    <option value="HIGH">HIGH</option>
+                </select>
+                <label for="priority" class="form-v2-label">Priority</label>
+            </div>
+
+            <div class="form-v2-group">
+                <select id="status" th:field="*{status}" class="form-v2-input"
+                        th:disabled="${adminRole != null and adminRole.name() == 'ADMIN'}" onchange="this.setAttribute('data-placeholder-shown', this.value != '' ? 'false' : 'true');">
+                    <option value="" disabled selected hidden>Select Status</option>
+                    <option value="OPEN">OPEN</option>
+                    <option value="IN_PROGRESS">IN_PROGRESS</option>
+                    <option value="RESOLVED">RESOLVED</option>
+                    <option value="CLOSED">CLOSED</option>
+                </select>
+                <label for="status" class="form-v2-label">Status</label>
+            </div>
+
+            <div class="form-v2-group">
+                <select id="assignedTo" th:field="*{assignedTo}" class="form-v2-input"
+                        th:disabled="${adminRole != null and adminRole.name() == 'ADMIN'}" onchange="this.setAttribute('data-placeholder-shown', this.value != '' ? 'false' : 'true');">
+                    <option value="" disabled selected hidden>Select Staff Member</option>
+                    <option th:each="staff : ${staffList}"
+                            th:value="${staff}"
+                            th:text="${staff}">Staff Member</option>
+                </select>
+                <label for="assignedTo" class="form-v2-label">Assigned To</label>
+            </div>
+
+            <div class="form-v2-group">
+                <input type="text" id="bookingId" name="bookingId" class="form-v2-input" placeholder=" "
+                       th:value="${prefillBookingId}"
+                       th:readonly="${adminRole != null and adminRole.name() == 'ADMIN'}">
+                <label for="bookingId" class="form-v2-label">Booking ID (e.g., BK-..., optional)</label>
+            </div>
+
+            <!-- Hidden field to track if this ticket was created from a contact request -->
+            <input type="hidden" name="contactId" th:value="${contactId}">
+
+            <!-- File Attachments Section -->
+            <div class="form-v2-group full-width" th:if="${ticket.id != null}">
+                <div class="file-upload-area" style="border: 1px solid var(--border); padding: 1.5rem; border-radius: var(--radius); text-align: center;">
+                    <input type="file" id="attachments" name="attachments" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt"
+                           style="display: none;">
+                    <label for="attachments" style="cursor: pointer; color: var(--accent); font-size: .9rem;">
+                        📎 Click to upload attachments
+                    </label>
+                    <div id="file-list" style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-dim);"></div>
+                </div>
+                <div th:if="${ticket.attachments != null and !ticket.attachments.isEmpty()}"
+                     style="margin-top: 1rem; font-size: .85rem;">
+                    <strong>Current Attachments:</strong>
+                    <div th:each="file : ${#strings.arraySplit(ticket.attachments, ',')}"
+                         style="padding: 0.25rem 0; color: var(--text-dim);">
+                        📄 <span th:text="${file}">filename.pdf</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-v2-actions">
+                <a class="btn-v2" th:href="@{/admin/support}">Cancel</a>
+                <span th:if="${adminRole != null and (adminRole.name() == 'SUPPORT' or adminRole.name() == 'SUPER_ADMIN')}">
+                    <button type="submit" class="btn-v2 primary" th:text="${ticket.id != null ? 'Update Ticket' : 'Create Ticket'}">Create Ticket</button>
+                </span>
+                <div th:if="${adminRole != null and adminRole.name() == 'ADMIN'}" class="alert info" style="margin: 0; padding: .75rem 1.25rem; font-size: .85rem; text-align: left;">
+                    You have view-only permissions for ticket details but can add comments below.
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Comments Section (if ticket exists) -->
+    <div th:if="${ticket.id != null}" class="card" style="max-width: 800px; margin: 2rem auto;">
+        <h3 style="margin:0 0 1rem 0; font-weight: 600;">Comments</h3>
+        <div th:if="${#lists.isEmpty(comments)}" class="muted" style="text-align: center; padding: 1rem 0;">No comments yet. Be the first to add one!</div>
+        <div th:each="c : ${comments}" class="comment-item" style="padding:.8rem 1rem; border:1px solid var(--border); border-radius:var(--radius); margin:.5rem 0; background:var(--bg-alt);">
+            <div style="font-size:.8rem; color:var(--text-dim); margin-bottom:.2rem;" th:text="${c.author}">author</div>
+            <div style="white-space:pre-wrap;" th:text="${c.content}">content</div>
+            <div class="muted" style="font-size:.7rem; margin-top:.4rem;" th:text="${#temporals.format(c.createdAt, 'MMM dd, yyyy HH:mm')}">time</div>
+        </div>
+        <form th:action="@{'/admin/support/' + ${ticket.id} + '/comment'}" method="post" style="margin-top:1.5rem; display:flex; gap:1rem;">
+            <input name="author" placeholder="Your Name" style="padding:.5rem .8rem; background:var(--bg-alt); border:1px solid var(--border); border-radius:var(--radius); color:var(--text); flex:.3;">
+            <input name="content" required placeholder="Write a quick update..." style="padding:.5rem .8rem; background:var(--bg-alt); border:1px solid var(--border); border-radius:var(--radius); color:var(--text); flex:1;">
+            <button class="btn" type="submit" style="letter-spacing:.1em; padding:.5rem 1rem;">Add</button>
+        </form>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener("DOMContentLoaded", function() {
+            // Logic for select placeholder styling
+            document.querySelectorAll('.form-v2-input[data-placeholder-shown]').forEach(select => {
+                select.setAttribute('data-placeholder-shown', select.value ? 'false' : 'true');
+            });
+
+            // File upload display logic
+            const fileInput = document.getElementById('attachments');
+            const fileListDiv = document.getElementById('file-list');
+
+            if(fileInput && fileListDiv) {
+                fileInput.addEventListener('change', function(e) {
+                    fileListDiv.innerHTML = ''; // Clear previous list
+                    if (e.target.files.length > 0) {
+                        const title = document.createElement('strong');
+                        title.textContent = 'Selected Files:';
+                        title.style.display = 'block';
+                        title.style.marginBottom = '.5rem';
+                        fileListDiv.appendChild(title);
+                    }
+                    Array.from(e.target.files).forEach(file => {
+                        const fileEntry = document.createElement('div');
+                        fileEntry.textContent = '📄 ' + file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+                        fileListDiv.appendChild(fileEntry);
+                    });
+                });
+            }
+        });
+        /*]]>*/
+    </script>
+</section>
+</html>

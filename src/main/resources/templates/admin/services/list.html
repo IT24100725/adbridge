@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head">
+        <h1 class="page-title" th:text="${pageHeading}">SERVICES</h1>
+        <a class="btn primary" href="/admin/services/new"
+           th:if="${adminRole != null and (adminRole.name() == 'MARKETING' or adminRole.name() == 'SUPER_ADMIN')}">+ NEW SERVICE</a>
+    </div>
+    <div th:if="${flashMsg}" class="alert success" th:text="${flashMsg}"></div>
+    <div class="card">
+        <table class="table services-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>TITLE</th>
+                <th>SLUG</th>
+                <th>STATUS</th>
+                <th class="right">PRICE</th>
+                <th>ACTIONS</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="s : ${services}">
+                <td th:text="${s.id}">1</td>
+                <td th:text="${s.title}">Title</td>
+                <td th:text="${s.slug}">slug</td>
+                <td>
+                    <span th:text="${s.status}"
+                          th:class="'badge ' + (${s.status}=='ACTIVE' ? 'green' : 'gray')">DRAFT</span>
+                </td>
+                <td class="right" th:text="${s.price} ?: '-'">-</td>
+                <td>
+                    <!-- Marketing Planner can edit/delete created services; Super Admin sees all -->
+                    <span th:if="${adminRole != null and (adminRole.name() == 'MARKETING' or adminRole.name() == 'SUPER_ADMIN')}">
+                        <a th:href="@{'/admin/services/' + ${s.id} + '/edit'}" class="btn xs">EDIT</a>
+                        <form th:action="@{'/admin/services/' + ${s.id} + '/delete'}" method="post"
+                              style="display:inline" onsubmit="return confirm('Delete this service?')">
+                            <button type="submit" class="btn xs danger">DEL</button>
+                        </form>
+                    </span>
+                    <!-- Managing Director can approve/reject; Super Admin sees all -->
+                    <span th:if="${adminRole != null and (adminRole.name() == 'DIRECTOR' or adminRole.name() == 'SUPER_ADMIN')}" style="margin-left:.4rem;">
+                        <form th:action="@{'/admin/services/' + ${s.id} + '/approve'}" method="post" style="display:inline;">
+                            <button type="submit" class="btn xs">APPROVE</button>
+                        </form>
+                        <form th:action="@{'/admin/services/' + ${s.id} + '/reject'}" method="post" style="display:inline;">
+                            <button type="submit" class="btn xs danger">REJECT</button>
+                        </form>
+                    </span>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(services)}">
+                <td colspan="6" class="muted center">NO SERVICES YET.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+</html>

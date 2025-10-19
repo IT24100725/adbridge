@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::content})}">
+<th:block th:fragment="content">
+
+    <section class="section">
+        <div class="section-head" style="text-align:center;">
+            <h2>Book a Campaign</h2>
+            <p>Pick a service to continue. You can finalize details on the next page.</p>
+        </div>
+
+        <div class="cards cards-3cols" style="max-width:860px;margin:0 auto;">
+            <a class="card" th:href="@{/services} + '#svc-tv'"><h3>TV Advertisement</h3><p>Broadcast on top TV channels.</p></a>
+            <a class="card" th:href="@{/services} + '#svc-radio'"><h3>Radio Promotion</h3><p>Reach audiences on FM radio.</p></a>
+            <a class="card" th:href="@{/services} + '#svc-social'"><h3>Social Media Campaign</h3><p>Facebook, Instagram, TikTok, YouTube.</p></a>
+            <a class="card" th:href="@{/services} + '#svc-newspaper'"><h3>Newspaper Ad</h3><p>Place ads in leading newspapers.</p></a>
+            <a class="card" th:href="@{/services} + '#svc-billboard'"><h3>Billboard Advertising</h3><p>High-visibility outdoor ads.</p></a>
+            <a class="card" th:href="@{/services} + '#svc-banner'"><h3>Digital Banner</h3><p>Display ads on websites/apps.</p></a>
+        </div>
+    </section>
+
+</th:block>
+</html>

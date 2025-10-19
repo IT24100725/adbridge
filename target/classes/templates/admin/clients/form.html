@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head" style="display:flex; justify-content:space-between; align-items:center;">
+        <h1 class="page-title" th:text="${pageHeading}">CLIENT FORM</h1>
+        <a class="btn-v2" th:href="@{/admin/clients}">Back</a>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <div th:if="${isFromContact}" class="alert alert-info" style="background-color: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; padding: 12px; border-radius: 4px; margin: 0 auto 2rem auto; max-width: 800px;">
+        <strong>Creating client from contact message:</strong> The form has been pre-populated. You can modify any fields as needed.
+    </div>
+
+    <div class="form-container-v2">
+        <h2 class="form-v2-header" th:text="${client.userId != null ? 'Edit Client Information' : 'Create New Client'}">Client Information</h2>
+
+        <form th:action="${client.userId != null and client.userId != '' ? '/admin/clients/' + client.userId : '/admin/clients'}"
+              th:method="post"
+              th:object="${client}"
+              class="form-v2">
+
+            <!-- Hidden field for contactId when creating from contact -->
+            <input th:if="${contactId != null}" type="hidden" name="contactId" th:value="${contactId}">
+
+            <!-- Full Name -->
+            <div class="form-v2-group">
+                <input type="text" id="fullName" th:field="*{fullName}" class="form-v2-input" placeholder=" " required>
+                <label for="fullName" class="form-v2-label">Full Name *</label>
+            </div>
+
+            <!-- Email -->
+            <div class="form-v2-group">
+                <input type="email" id="email" th:field="*{email}" class="form-v2-input" placeholder=" " required>
+                <label for="email" class="form-v2-label">Email *</label>
+            </div>
+
+            <!-- Phone -->
+            <div class="form-v2-group">
+                <input type="tel" id="phone" th:field="*{phone}" class="form-v2-input" placeholder=" " required>
+                <label for="phone" class="form-v2-label">Phone *</label>
+            </div>
+
+            <!-- Company Name -->
+            <div class="form-v2-group">
+                <input type="text" id="companyName" th:field="*{companyName}" class="form-v2-input" placeholder=" ">
+                <label for="companyName" class="form-v2-label">Company</label>
+            </div>
+
+            <!-- Conditionally render credentials fields -->
+            <th:block th:if="${isFromContact}">
+                <!-- Generated Credentials for clients from contact messages -->
+                <div class="form-v2-group">
+                    <input type="text" th:field="*{username}" class="form-v2-input" placeholder=" " readonly style="background-color: var(--bg); cursor: not-allowed;">
+                    <label class="form-v2-label">Username (Auto-Generated)</label>
+                </div>
+                <div class="form-v2-group">
+                    <input type="text" th:value="${originalPassword != null ? originalPassword : client.password}" class="form-v2-input" placeholder=" " readonly style="background-color: var(--bg); cursor: not-allowed;">
+                    <label class="form-v2-label">Password (Auto-Generated)</label>
+                </div>
+                <div class="form-v2-group full-width" style="color:var(--text-dim); font-size: .85rem; background: var(--bg); border-radius: var(--radius); padding: .75rem 1rem;">
+                    <strong>Note:</strong> These credentials will be sent to the client for login access.
+                </div>
+            </th:block>
+
+            <th:block th:unless="${isFromContact}">
+                <!-- Standard credentials fields -->
+                <div class="form-v2-group">
+                    <input type="text" id="username" th:field="*{username}" class="form-v2-input" placeholder=" " required>
+                    <label for="username" class="form-v2-label">Username *</label>
+                </div>
+                <div class="form-v2-group">
+                    <input type="password" id="password" th:field="*{password}" class="form-v2-input" placeholder=" ">
+                    <label for="password" class="form-v2-label">Password (leave blank if unchanged)</label>
+                </div>
+            </th:block>
+
+            <!-- Status -->
+            <div class="form-v2-group">
+                <select id="status" th:field="*{status}" class="form-v2-input" onchange="this.setAttribute('data-placeholder-shown', this.value != '' ? 'false' : 'true');">
+                    <option value="" disabled selected hidden>Select Status</option>
+                    <option th:each="s : ${statusOptions}" th:value="${s}" th:text="${s}"></option>
+                </select>
+                <label for="status" class="form-v2-label">Status</label>
+            </div>
+
+            <!-- Internal Notes -->
+            <div class="form-v2-group full-width">
+                <textarea id="internalNotes" th:field="*{internalNotes}" class="form-v2-input" placeholder=" " rows="4"></textarea>
+                <label for="internalNotes" class="form-v2-label">Internal Notes</label>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-v2-actions">
+                <a class="btn-v2" th:href="@{/admin/clients}">Cancel</a>
+                <button type="submit" class="btn-v2 primary" th:text="${client.userId != null ? 'Update Client' : 'Create Client'}">Create Client</button>
+            </div>
+        </form>
+    </div>
+
+    <footer class="admin-footer-sticky">
+        © 2025 AdBridgeLanka · Admin
+    </footer>
+</section>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head" style="display:flex; justify-content:space-between; align-items:center;">
+        <h1 class="page-title" th:text="${pageHeading}">UPLOAD DOCUMENT</h1>
+        <a class="btn-v2" th:href="@{/admin/documents}">Back to List</a>
+    </div>
+
+    <div th:if="${flashMsg}" class="alert alert-success" th:text="${flashMsg}" style="max-width: 800px; margin: 0 auto 2rem auto;"></div>
+    <div th:if="${errorMsg}" class="alert alert-danger" th:text="${errorMsg}" style="max-width: 800px; margin: 0 auto 2rem auto;"></div>
+
+    <div class="form-container-v2">
+        <h2 class="form-v2-header">Document Details</h2>
+
+        <form th:action="@{/admin/documents/upload}" method="post" enctype="multipart/form-data" class="form-v2">
+
+            <!-- Document Title -->
+            <div class="form-v2-group full-width">
+                <input type="text" id="title" name="title" required th:value="${document.title}" class="form-v2-input" placeholder=" ">
+                <label for="title" class="form-v2-label">Document Title *</label>
+            </div>
+
+            <!-- Description -->
+            <div class="form-v2-group full-width">
+                <textarea id="description" name="description" rows="4" th:text="${document.description}" class="form-v2-input" placeholder=" "></textarea>
+                <label for="description" class="form-v2-label">Description</label>
+            </div>
+
+            <!-- Category -->
+            <div class="form-v2-group">
+                <select id="category" name="category" required class="form-v2-input" onchange="this.setAttribute('data-placeholder-shown', this.value != '' ? 'false' : 'true');">
+                    <option value="" disabled selected hidden>Select Category</option>
+                    <option value="CONTRACT" th:selected="${document.category == 'CONTRACT'}">Contract</option>
+                    <option value="INVOICE" th:selected="${document.category == 'INVOICE'}">Invoice</option>
+                    <option value="REPORT" th:selected="${document.category == 'REPORT'}">Report</option>
+                    <option value="PRESENTATION" th:selected="${document.category == 'PRESENTATION'}">Presentation</option>
+                    <option value="OTHER" th:selected="${document.category == 'OTHER'}">Other</option>
+                </select>
+                <label for="category" class="form-v2-label">Category *</label>
+            </div>
+
+            <!-- isPublic Checkbox -->
+            <div class="form-v2-group" style="display: flex; align-items: center; justify-content: center; background: var(--bg-alt); border: 1px solid var(--border); border-radius: var(--radius); padding: 0 1rem;">
+                <label for="isPublic" style="color: var(--text-dim); cursor: pointer; display: flex; align-items: center; gap: .75rem; width: 100%; height: 100%; padding: .5rem 0;">
+                    <input type="checkbox" id="isPublic" name="isPublic" th:checked="${document.isPublic}" style="transform: scale(1.2); accent-color: var(--accent);">
+                    Make this document public
+                </label>
+            </div>
+
+            <!-- File Input -->
+            <div class="form-v2-group full-width">
+                <label for="file" class="form-v2-label" style="position: static; transform: none; font-size: 0.9rem; color: var(--text-dim); margin-bottom: .5rem; display: block;">Select File *</label>
+                <input type="file" id="file" name="file" required accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png"
+                       style="padding: .75rem; background: var(--bg-alt); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); width: 100%;">
+                <small class="muted" style="margin-top: .5rem; display: block;">Supported formats: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, JPG, PNG</small>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-v2-actions">
+                <a th:href="@{/admin/documents}" class="btn-v2">Cancel</a>
+                <button type="submit" class="btn-v2 primary">Upload Document</button>
+            </div>
+        </form>
+    </div>
+
+    <footer class="admin-footer-sticky">
+        © 2025 AdBridgeLanka · Admin
+    </footer>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        // Logic for select placeholder styling
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll('.form-v2-input[onchange*="data-placeholder-shown"]').forEach(select => {
+                select.setAttribute('data-placeholder-shown', select.value ? 'false' : 'true');
+            });
+        });
+        /*]]>*/
+    </script>
+</section>
+</html>

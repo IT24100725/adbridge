@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head">
+        <h1 class="page-title">New Invoice</h1>
+        <a class="btn" th:href="@{/admin/invoices}">Back</a>
+    </div>
+
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <div class="card">
+        <form th:action="@{/admin/invoices}" method="post" class="admin-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="bookingId">Booking ID *</label>
+                    <input id="bookingId" name="bookingId" th:value="${bookingId}" placeholder="BK-..." required>
+                </div>
+                <div class="form-group">
+                    <label for="amount">Amount (LKR) *</label>
+                    <input id="amount" name="amount" type="number" min="0" step="1" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="dueDate">Due Date (YYYY-MM-DDThh:mm)</label>
+                    <input id="dueDate" name="dueDate" placeholder="2025-01-31T17:00">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="notes">Notes</label>
+                <input id="notes" name="notes" placeholder="Optional notes">
+            </div>
+            <div class="form-actions">
+                <button class="btn primary" type="submit">Create Invoice</button>
+                <a class="btn" th:href="@{/admin/invoices}">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <footer class="admin-footer-sticky">
+        © 2025 AdBridgeLanka · Admin
+    </footer>
+</section>
+</html>
+
+
+
+
+
+
+
+

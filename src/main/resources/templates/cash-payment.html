@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::content})}">
+<th:block th:fragment="content">
+
+    <!-- All styles are self-contained in this block and will not affect other pages. -->
+    <style>
+        :root {
+            --bg:#131820;
+            --panel:#1e2429;
+            --panel-alt:#242a30;
+            --border:#2a3138;
+            --border-soft:#21272d;
+            --accent:#e6c567;
+            --blue:#1674ff;
+            --blue-hover:#2682ff;
+            --text:#e5e9ea;
+            --text-dim:#7d8587;
+            --text-faint:#556066;
+            --font:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Arial,sans-serif;
+            --radius:6px;
+            --radius-lg:18px;
+        }
+
+        .cash-payment-page-wrapper {
+            background: radial-gradient(circle at 20% 40%, rgba(25,44,66,.28), transparent 65%), linear-gradient(115deg, #0c1013, #0b0e10 60%, #0b0d0f);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 140px 2rem 100px 2rem;
+            font-family: var(--font);
+        }
+
+        .cash-payment-grid {
+            max-width: 1150px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 25% 75%;
+            gap: 4rem;
+            align-items: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Left Column: Form - Transparent blend with background */
+        .payment-form-column {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
+            max-width: 350px;
+        }
+
+        .payment-form {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .form-group {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-bottom: 0.3rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            background: transparent !important;
+            border: none !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+            color: var(--text) !important;
+            font-size: 12px !important;
+            letter-spacing: .04em !important;
+            font-family: var(--font) !important;
+            padding: 10px 0 !important;
+            outline: none !important;
+            transition: all 0.3s ease !important;
+            width: 100% !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+        }
+        
+        .form-group input::placeholder,
+        .form-group select::placeholder,
+        .form-group textarea::placeholder {
+            color: var(--text-faint);
+            font-size: 12px;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-bottom-color: rgba(255, 255, 255, 0.6) !important;
+            box-shadow: none !important;
+            background: transparent !important;
+            border-top: none !important;
+            border-left: none !important;
+            border-right: none !important;
+        }
+        
+        .form-group input.error,
+        .form-group select.error,
+        .form-group textarea.error {
+            border-bottom-color: #dc3545 !important;
+        }
+        
+        .form-group textarea {
+            resize: vertical !important;
+            min-height: 60px !important;
+        }
+
+        .amount-display {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 0;
+            text-align: center;
+            margin-top: 1rem;
+        }
+        .amount-display .amount-label {
+            font-size: 10px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.3rem;
+        }
+        .amount-display .amount-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        /* SEND button style with navigator animation */
+        .submit-button {
+            background: transparent;
+            color: var(--text-dim);
+            border: none;
+            font-size: 1rem;
+            letter-spacing: .32em;
+            text-transform: uppercase;
+            font-weight: 500;
+            font-family: var(--font);
+            padding: .35rem 0 .4rem;
+            cursor: pointer;
+            position: relative;
+            transition: color .4s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 56px;
+            width: auto;
+            margin-top: 16px;
+        }
+
+        /* Navigator underline animation */
+        .submit-button:after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 1px;
+            width: 0;
+            background: linear-gradient(90deg, var(--accent), transparent);
+            opacity: .55;
+            transition: width .5s;
+        }
+
+        .submit-button:hover {
+            color: #fff;
+        }
+
+        .submit-button:hover:after {
+            width: 100%;
+        }
+
+        /* Right Column: Hero with blob */
+        .payment-info-column {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* SVG Blob Background */
+        .hero-blob {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            width: 90%;
+            height: 90%;
+            opacity: 0.6;
+            z-index: 1;
+        }
+
+        .blob-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Hero Content */
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+
+        /* Hero Heading */
+        .hero-heading {
+            font-family: var(--font);
+            font-size: 140px;
+            letter-spacing: .26em;
+            font-weight: 500;
+            color: #fff;
+            margin: 0;
+            line-height: 0.9;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            text-shadow: none;
+            animation: none;
+        }
+
+        .heading-line {
+            position: relative;
+            display: block;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 900px) {
+            .cash-payment-page-wrapper {
+                padding: 120px 1.5rem 80px 1.5rem;
+            }
+            .cash-payment-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            .payment-form-column {
+                order: 1;
+            }
+            .payment-info-column {
+                order: 2;
+            }
+            .hero-heading {
+                font-size: 72px;
+            }
+        }
+        @media (max-width: 500px) {
+            .cash-payment-page-wrapper {
+                padding: 110px 1rem 70px 1rem;
+            }
+            .hero-heading {
+                font-size: 64px;
+            }
+            .submit-button {
+                height: 48px;
+                font-size: 13px;
+            }
+        }
+    </style>
+
+    <div class="cash-payment-page-wrapper">
+        <div class="cash-payment-grid">
+            <!-- Left Column: Payment Form (transparent, blends with background) -->
+            <div class="payment-form-column">
+                    <form th:action="@{/process-cash-payment}" method="post" class="payment-form">
+                        <input type="hidden" name="bookingId" th:value="${booking.bookingId}">
+
+                        <div class="form-group">
+                        <label for="preferredDate">Preferred Payment Date</label>
+                        <input type="date" id="preferredDate" name="preferredDate" required/>
+                        </div>
+
+                        <div class="form-group">
+                        <label for="preferredTime">Preferred Time</label>
+                        <select id="preferredTime" name="preferredTime" required>
+                                <option value="">Select Time</option>
+                                <option value="morning">Morning (9:00 AM - 12:00 PM)</option>
+                                <option value="afternoon">Afternoon (12:00 PM - 5:00 PM)</option>
+                                <option value="evening">Evening (5:00 PM - 8:00 PM)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                        <label for="paymentLocation">Payment Location</label>
+                        <select id="paymentLocation" name="paymentLocation" required>
+                                <option value="">Select Location</option>
+                                <option value="office">Our Office</option>
+                                <option value="client">Your Location</option>
+                                <option value="meeting">Meeting Point</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                        <label for="contactNumber">Contact Number for Payment</label>
+                        <input type="tel" id="contactNumber" name="contactNumber" th:value="${booking.contactNumber}" required/>
+                        </div>
+
+                        <div class="form-group">
+                        <label for="specialInstructions">Special Instructions (Optional)</label>
+                        <textarea id="specialInstructions" name="specialInstructions" placeholder="Any special instructions for payment collection" rows="2"></textarea>
+                        </div>
+
+                        <div class="amount-display">
+                            <div class="amount-label">TOTAL AMOUNT</div>
+                            <div class="amount-value" th:text="'LKR ' + ${#numbers.formatInteger(booking.totalAmount, 0, 'COMMA')}">LKR 15,000</div>
+                        </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="submit-button">
+                            SCHEDULE PAYMENT
+                        </button>
+                    </div>
+                    </form>
+            </div>
+
+            <!-- Right Column: Hero Visual with Blob -->
+            <div class="payment-info-column">
+                <div class="hero-blob">
+                    <svg viewBox="0 0 200 200" class="blob-svg">
+                        <path d="M40,50 Q60,20 90,40 T140,50 Q160,80 140,110 T90,130 Q60,150 40,120 Q20,90 40,50 Z" 
+                              fill="none" 
+                              stroke="rgba(255,255,255,0.06)" 
+                              stroke-width="1.5"/>
+                    </svg>
+                    </div>
+
+                <div class="hero-content">
+                    <h1 class="hero-heading">
+                        <span class="heading-line">CASH</span>
+                        <span class="heading-line">PAYMENT</span>
+                    </h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Original script preserved and adapted to new IDs -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        // Set minimum date to today
+            const today = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('preferredDate');
+            if (dateInput) {
+                dateInput.setAttribute('min', today);
+            }
+
+            const preferredDateInput = document.getElementById('preferredDate');
+            const preferredTimeInput = document.getElementById('preferredTime');
+            const paymentLocationInput = document.getElementById('paymentLocation');
+            const contactNumberInput = document.getElementById('contactNumber');
+            const specialInstructionsInput = document.getElementById('specialInstructions');
+            const form = document.querySelector('.payment-form');
+
+            function clearErrorOnChange(element) {
+                if (element) {
+                    element.addEventListener('input', (e) => e.target.classList.remove('error'));
+                    element.addEventListener('change', (e) => e.target.classList.remove('error'));
+                }
+            }
+
+            clearErrorOnChange(preferredDateInput);
+            clearErrorOnChange(preferredTimeInput);
+            clearErrorOnChange(paymentLocationInput);
+            clearErrorOnChange(contactNumberInput);
+            clearErrorOnChange(specialInstructionsInput);
+
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    form.querySelectorAll('input, select, textarea').forEach(field => field.classList.remove('error'));
+            let hasErrors = false;
+
+                    function validateField(field, condition, message) {
+                        if (!field || condition) {
+                            if (field) field.classList.add('error');
+                            if (!hasErrors) alert(message);
+                hasErrors = true;
+            }
+                    }
+
+                    validateField(preferredDateInput, !preferredDateInput.value.trim(), 'Please select a preferred payment date');
+                    validateField(preferredTimeInput, !preferredTimeInput.value.trim(), 'Please select a preferred time');
+                    validateField(paymentLocationInput, !paymentLocationInput.value.trim(), 'Please select a payment location');
+                    validateField(contactNumberInput, !contactNumberInput.value.trim(), 'Please enter a contact number');
+
+            if (hasErrors) {
+                e.preventDefault();
+                return false;
+            }
+            console.log('All fields validated successfully, submitting form...');
+                });
+            }
+        });
+    </script>
+
+</th:block>
+</html>

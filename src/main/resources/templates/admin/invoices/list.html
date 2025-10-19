@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+        <h1 class="page-title" th:text="${pageHeading}">INVOICES</h1>
+        <a th:if="${adminRole == null || adminRole.name() != 'ADMIN'}" class="btn primary" th:href="@{/admin/invoices/new}">+ New Invoice</a>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <!-- Advanced Search and Filter Form -->
+    <div class="card" style="margin-bottom: 20px;">
+        <form th:action="@{/admin/invoices}" method="get" style="display: flex; gap: 10px; align-items: end; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 200px;">
+                <label for="q">Search</label>
+                <input type="text" id="q" name="q" th:value="${q}" 
+                       placeholder="Search by invoice ID, booking ID, client name, or email">
+            </div>
+            <div>
+                <label for="status">Status</label>
+                <select id="status" name="status">
+                    <option value="">All Status</option>
+                    <option th:each="status : ${statusOptions}" 
+                            th:value="${status}" 
+                            th:text="${status}" 
+                            th:selected="${currentStatus == status}">ISSUED</option>
+                </select>
+            </div>
+            <div>
+                <label for="client">Client</label>
+                <input type="text" id="client" name="client" th:value="${currentClient}" 
+                       placeholder="Client name or email">
+            </div>
+            <div>
+                <label for="amountMin">Min Amount</label>
+                <input type="number" id="amountMin" name="amountMin" th:value="${currentAmountMin}" 
+                       placeholder="0" min="0">
+            </div>
+            <div>
+                <label for="amountMax">Max Amount</label>
+                <input type="number" id="amountMax" name="amountMax" th:value="${currentAmountMax}" 
+                       placeholder="100000" min="0">
+            </div>
+            <div>
+                <button type="submit" class="btn">Search</button>
+                <a th:href="@{/admin/invoices}" class="btn">Clear</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="card">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Invoice</th>
+                <th>Booking</th>
+                <th>Client</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="i : ${invoices}">
+                <td>
+                    <a th:href="@{'/admin/invoices/' + ${i.id}}" th:text="${i.invoiceId}" style="font-weight: 600;">INV-XXXX</a>
+                    <div class="muted" th:text="${#temporals.format(i.createdAt, 'MMM dd, yyyy')}" style="font-size: 0.9em;">Jan 15, 2025</div>
+                </td>
+                <td>
+                    <a th:href="@{'/admin/campaigns?search=' + ${i.bookingId}}" th:text="${i.bookingId}" style="color: #007bff;">BK-0001</a>
+                </td>
+                <td>
+                    <div th:text="${i.clientName}" style="font-weight: 600;">Name</div>
+                    <div class="muted" th:text="${i.clientEmail}" style="font-size: 0.9em;">email</div>
+                </td>
+                <td>
+                    <div th:text="${i.amount} + ' ' + ${i.currency}" style="font-weight: 600;">0 LKR</div>
+                    <div th:if="${i.dueDate != null}" class="muted" th:text="'Due: ' + ${#temporals.format(i.dueDate, 'MMM dd, yyyy')}" style="font-size: 0.9em;">Due: Jan 31, 2025</div>
+                </td>
+                <td>
+                    <span th:switch="${i.status}" class="status-badge">
+                        <span th:case="'DRAFT'" class="badge draft">DRAFT</span>
+                        <span th:case="'ISSUED'" class="badge issued">ISSUED</span>
+                        <span th:case="'PAID'" class="badge paid">PAID</span>
+                        <span th:case="'CANCELLED'" class="badge cancelled">CANCELLED</span>
+                    </span>
+                </td>
+                <td>
+                    <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                        <a th:href="@{'/admin/invoices/' + ${i.id}}" class="btn xs">View</a>
+                        <form th:if="${i.status.name() == 'ISSUED'}" th:action="@{'/admin/invoices/' + ${i.id} + '/mark-paid'}" method="post" style="display:inline;">
+                            <button class="btn xs success" type="submit">Mark Paid</button>
+                        </form>
+                        <form th:if="${i.status.name() != 'PAID' and i.status.name() != 'CANCELLED'}" th:action="@{'/admin/invoices/' + ${i.id} + '/cancel'}" method="post" style="display:inline;" onsubmit="return confirm('Cancel this invoice?')">
+                            <button class="btn xs danger" type="submit">Cancel</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(invoices)}">
+                <td colspan="6" class="muted center">NO INVOICES.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <footer class="admin-footer-sticky">
+        © 2025 AdBridgeLanka · Admin
+    </footer>
+    
+    <style>
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge.draft {
+            background-color: #95a5a6;
+            color: white;
+        }
+        .badge.issued {
+            background-color: #3498db;
+            color: white;
+        }
+        .badge.paid {
+            background-color: #27ae60;
+            color: white;
+        }
+        .badge.cancelled {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .status-badge {
+            display: inline-block;
+        }
+        .btn.success {
+            background-color: #27ae60;
+            color: white;
+        }
+        .btn.success:hover {
+            background-color: #229954;
+        }
+    </style>
+</section>
+</html>
+
+
+
+
+
+

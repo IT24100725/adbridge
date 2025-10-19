@@ -1,0 +1,61 @@
+<header class="main-nav" th:fragment="navibar">
+    <div class="nav-inner">
+        <a class="logo" th:href="@{/admin/dashboard}">Ad<span>BridgeLanka</span></a>
+        <nav class="nav-links">
+            <a th:href="@{/admin/dashboard}" th:classappend="${activePage}=='dashboard'?' active':''">Dashboard</a>
+            <a th:if="${adminRole == null || adminRole.name() != 'ADMIN'}" th:href="@{/admin/campaigns}" th:unless="${adminRole != null and adminRole.name() == 'DIRECTOR'}">Campaigns</a>
+            <a th:if="${adminRole != null and adminRole.name() == 'DIRECTOR'}" th:href="@{/admin/managing-director/campaigns}">Campaigns</a>
+            <a th:if="${adminRole == null || adminRole.name() == 'FINANCE' || adminRole.name() == 'SUPER_ADMIN'}" th:href="@{/admin/payments}">Payments</a>
+            <a th:if="${adminRole == null || adminRole.name() == 'ADMIN' || adminRole.name() == 'MARKETING' || adminRole.name() == 'SUPER_ADMIN' || adminRole.name() == 'DIRECTOR' || adminRole.name() == 'SUPPORT'}" th:href="@{/admin/documents}">Documents</a>
+            <a th:if="${adminRole == null || adminRole.name() == 'MARKETING' || adminRole.name() == 'SUPER_ADMIN'}" th:href="@{/admin/tasks}">Tasks</a>
+            <a th:if="${adminRole == null || adminRole.name() == 'SUPPORT' || adminRole.name() == 'SUPER_ADMIN' || adminRole.name() == 'DIRECTOR'}" th:href="@{/admin/support}">Support</a>
+            <a th:if="${adminRole == null || adminRole.name() == 'SUPPORT' || adminRole.name() == 'ADMIN' || adminRole.name() == 'SUPER_ADMIN' || adminRole.name() == 'DIRECTOR'}" th:href="@{/admin/clients}">Clients</a>
+            <a th:if="${adminRole == null || adminRole.name() == 'FINANCE' || adminRole.name() == 'ADMIN' || adminRole.name() == 'SUPER_ADMIN'}" th:href="@{/admin/finance}">Finance</a>
+            <a th:if="${adminRole == null || adminRole.name() == 'SUPER_ADMIN' || adminRole.name() == 'ADMIN' || adminRole.name() == 'FINANCE'}" th:href="@{/admin/reports}">Reports</a>
+            <a th:if="${adminRole == null || adminRole.name() == 'SUPER_ADMIN' || adminRole.name() == 'DEVELOPER'}" th:href="@{/admin/settings}">Settings</a>
+            <a th:href="@{/admin/staff}">Staff</a>
+        </nav>
+        <div class="nav-auth" style="position:relative;">
+            <!-- Three dots admin menu -->
+            <button id="admin-more-btn" class="btn small dark" aria-label="Admin menu" type="button" style="margin-left:.7rem;">
+                <span style="font-size:1.2em;line-height:1;">&#x22EE;</span>
+            </button>
+            <div id="admin-more-dropdown" class="admin-dropdown-menu" style="display:none; position:absolute; right:0; top:calc(100% + 8px); min-width:140px; background:#14181b; border:1px solid #20272c; border-radius:12px; box-shadow:0 6px 32px -8px #00000080; z-index:99; padding:.35rem 0;">
+                <a th:href="@{/}" class="dropdown-link" style="display:block; color:#e5e9ea; padding:.6rem 1.25rem; text-decoration:none; font-size:.89em; letter-spacing:.17em; transition:background .2s;">View Site</a>
+                <a th:href="@{/admin/logout}" class="dropdown-link logout" style="display:block; color:#e35b5b; padding:.6rem 1.25rem; text-decoration:none; font-size:.89em; letter-spacing:.17em; transition:background .2s;">Logout</a>
+            </div>
+        </div>
+    </div>
+</header>
+<script>
+    (function() {
+        var btn = document.getElementById('admin-more-btn');
+        var menu = document.getElementById('admin-more-dropdown');
+        if (!btn || !menu) return;
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var open = menu.style.display === 'block';
+            menu.style.display = open ? 'none' : 'block';
+            if (!open) {
+                setTimeout(function() {
+                    document.addEventListener('mousedown', closeMenu);
+                }, 0);
+            } else {
+                document.removeEventListener('mousedown', closeMenu);
+            }
+        });
+        function closeMenu(e) {
+            if (!menu.contains(e.target) && e.target !== btn) {
+                menu.style.display = 'none';
+                document.removeEventListener('mousedown', closeMenu);
+            }
+        }
+        // Close menu if a dropdown link is clicked
+        menu.querySelectorAll('.dropdown-link').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.style.display = 'none';
+                document.removeEventListener('mousedown', closeMenu);
+            });
+        });
+    })();
+</script>

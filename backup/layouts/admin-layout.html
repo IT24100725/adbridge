@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:fragment="adminLayout(content)">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title} ?: 'Admin · AdBridgeLanka'">Admin · AdBridgeLanka</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link th:href="@{/css/admin.css}" rel="stylesheet">
+</head>
+<body class="admin-body">
+<div th:replace="~{admin/admin-navibar.html :: navibar}"></div>
+<div class="admin-main">
+    <main class="admin-content" th:replace="${content}"></main>
+    <footer class="admin-footer-sticky">
+        © 2025 AdBridgeLanka · Admin
+    </footer>
+
+</div>
+<!-- MOVE THE NAVBAR JS HERE: -->
+<script>
+    (function() {
+        var btn = document.getElementById('admin-more-btn');
+        var menu = document.getElementById('admin-more-dropdown');
+        if (!btn || !menu) return;
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var open = menu.style.display === 'block';
+            menu.style.display = open ? 'none' : 'block';
+            if (!open) {
+                setTimeout(function() {
+                    document.addEventListener('mousedown', closeMenu);
+                }, 0);
+            } else {
+                document.removeEventListener('mousedown', closeMenu);
+            }
+        });
+        function closeMenu(e) {
+            if (!menu.contains(e.target) && e.target !== btn) {
+                menu.style.display = 'none';
+                document.removeEventListener('mousedown', closeMenu);
+            }
+        }
+        // Optional: close menu if dropdown link is clicked
+        menu.querySelectorAll('.dropdown-link').forEach(function(link) {
+            link.addEventListener('click', function() {
+                menu.style.display = 'none';
+                document.removeEventListener('mousedown', closeMenu);
+            });
+        });
+    })();
+</script>
+<script>
+    const y=new Date().getFullYear();
+    const e1=document.getElementById('year'); if(e1) e1.textContent=y;
+    const e2=document.getElementById('year2'); if(e2) e2.textContent=y;
+</script>
+</body>
+</html>

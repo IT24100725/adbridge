@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(~{::content})}">
+<th:block th:fragment="content">
+
+    <!-- All styles are self-contained in this block and will not affect other pages. -->
+    <style>
+        :root {
+            --bg:#131820;
+            --panel:#1e2429;
+            --panel-alt:#242a30;
+            --border:#2a3138;
+            --border-soft:#21272d;
+            --accent:#e6c567;
+            --blue:#1674ff;
+            --blue-hover:#2682ff;
+            --text:#e5e9ea;
+            --text-dim:#7d8587;
+            --text-faint:#556066;
+            --font:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Arial,sans-serif;
+            --radius:6px;
+            --radius-lg:18px;
+        }
+
+        .bank-transfer-page-wrapper {
+            background: var(--bg);
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 140px 2rem 100px 2rem;
+            font-family: var(--font);
+        }
+
+        .bank-transfer-grid {
+            max-width: 1150px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 35% 65%;
+            gap: 4rem;
+            align-items: flex-start;
+            position: relative;
+            z-index: 10;
+            padding: 3rem 0;
+        }
+
+        /* Left Column: Form - Transparent blend with background */
+        .bank-form-column {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
+            max-width: 450px;
+        }
+
+        .bank-form {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .form-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-section-title {
+            font-size: 14px;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+        }
+
+        .detail-item {
+            margin-bottom: 1rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .detail-item .label {
+            font-size: 10px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.3rem;
+            display: block;
+        }
+        
+        .detail-item .value {
+            font-size: 13px;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        /* Bank Details Box - styled like amount display */
+        .bank-details-box {
+            background: rgba(230, 197, 103, 0.05);
+            border: 1px solid rgba(230, 197, 103, 0.3);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .bank-details-box .detail-item {
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .bank-details-box .detail-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .amount-display {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 0;
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+        .amount-display .amount-label {
+            font-size: 10px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.3rem;
+        }
+        .amount-display .amount-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .reference-display {
+            background: transparent;
+            border: 1px dashed rgba(230, 197, 103, 0.4);
+            padding: 1rem;
+            text-align: center;
+            margin: 1rem 0;
+            border-radius: var(--radius);
+        }
+        .reference-display .ref-label {
+            font-size: 10px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.3rem;
+        }
+        .reference-display .ref-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--accent);
+            font-family: monospace;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            margin: 1.5rem 0;
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius);
+            padding: 2rem 1rem;
+            text-align: center;
+            background: transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--accent);
+            background: rgba(230, 197, 103, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-text {
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-bottom: 0.3rem;
+        }
+
+        .upload-subtext {
+            font-size: 10px;
+            color: var(--text-faint);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .uploaded-file {
+            background: rgba(230, 197, 103, 0.1);
+            border: 1px solid var(--accent);
+            border-radius: var(--radius);
+            padding: 0.8rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .uploaded-file.show {
+            display: block;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .file-name {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--accent);
+        }
+
+        .file-remove {
+            background: transparent;
+            color: var(--text-dim);
+            border: 1px solid var(--border);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .file-remove:hover {
+            color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        /* SEND button style with navigator animation */
+        .submit-button {
+            background: transparent;
+            color: var(--text-dim);
+            border: none;
+            font-size: 1rem;
+            letter-spacing: .32em;
+            text-transform: uppercase;
+            font-weight: 500;
+            font-family: var(--font);
+            padding: .35rem 0 .4rem;
+            cursor: pointer;
+            position: relative;
+            transition: color .4s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 56px;
+            width: auto;
+            margin-top: 16px;
+        }
+
+        /* Navigator underline animation */
+        .submit-button:after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 1px;
+            width: 0;
+            background: linear-gradient(90deg, var(--accent), transparent);
+            opacity: .55;
+            transition: width .5s;
+        }
+
+        .submit-button:hover {
+            color: #fff;
+        }
+
+        .submit-button:hover:after {
+            width: 100%;
+        }
+
+        .submit-button:disabled {
+            color: var(--text-faint);
+            cursor: not-allowed;
+        }
+
+        .submit-button:disabled:hover:after {
+            width: 0;
+        }
+
+        /* Right Column: Hero with blob */
+        .bank-hero-column {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* SVG Blob Background */
+        .hero-blob {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            width: 90%;
+            height: 90%;
+            opacity: 0.6;
+            z-index: 1;
+        }
+
+        .blob-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Hero Content */
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+
+        /* Hero Heading */
+        .hero-heading {
+            font-family: var(--font);
+            font-size: 100px;
+            letter-spacing: .26em;
+            font-weight: 500;
+            color: #fff;
+            margin: 0;
+            line-height: 0.9;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            text-shadow: none;
+            animation: none;
+        }
+
+        .heading-line {
+            position: relative;
+            display: block;
+        }
+
+
+        /* Responsive adjustments */
+        @media (max-width: 900px) {
+            .bank-transfer-page-wrapper {
+                padding: 120px 1.5rem 80px 1.5rem;
+            }
+            .bank-transfer-grid {
+                grid-template-columns: 1fr;
+                min-height: auto;
+                gap: 2rem;
+            }
+            .bank-form-column {
+                order: 1;
+            }
+            .bank-hero-column {
+                order: 2;
+            }
+            .hero-heading {
+                font-size: 60px;
+            }
+        }
+        @media (max-width: 500px) {
+            .bank-transfer-page-wrapper {
+                padding: 110px 1rem 70px 1rem;
+            }
+            .hero-heading {
+                font-size: 50px;
+            }
+            .submit-button {
+                height: 48px;
+                font-size: 13px;
+            }
+        }
+    </style>
+
+    <div class="bank-transfer-page-wrapper">
+        <div class="bank-transfer-grid">
+            <!-- Left Column: Bank Transfer Form (transparent, blends with background) -->
+            <div class="bank-form-column">
+                <form th:action="@{/process-bank-transfer}" method="post" class="bank-form" enctype="multipart/form-data" id="bankTransferForm">
+                    <input type="hidden" name="bookingId" th:value="${booking.bookingId}">
+
+                    <!-- Booking Information Section -->
+                    <div class="form-section">
+                        <div class="form-section-title">Booking Information</div>
+                        <div class="detail-item">
+                            <span class="label">Booking ID</span>
+                            <span class="value" th:text="${booking.bookingId}">#ADB-2024-001</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Client Name</span>
+                            <span class="value" th:text="${booking.fullName}">John Client</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Service</span>
+                            <span class="value" th:text="${booking.serviceType}">TV Advertisement</span>
+                        </div>
+                    </div>
+
+                    <!-- Bank Details Section in Box -->
+                    <div class="form-section">
+                        <div class="form-section-title">Bank Details</div>
+                        <div class="bank-details-box">
+                            <div class="detail-item">
+                                <span class="label">Bank Name</span>
+                                <span class="value">Sampath Bank PLC</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Branch</span>
+                                <span class="value">Panadura</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Account Name</span>
+                                <span class="value">AdBridge Lanka (Pvt) Ltd</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Account Number</span>
+                                <span class="value">0123 4567 8901 2345</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Amount Display -->
+                    <div class="amount-display">
+                        <div class="amount-label">TOTAL AMOUNT</div>
+                        <div class="amount-value" th:text="'LKR ' + ${#numbers.formatInteger(booking.totalAmount, 0, 'COMMA')}">LKR 15,000</div>
+                    </div>
+
+                    <!-- Reference Display -->
+                    <div class="reference-display">
+                        <div class="ref-label">REFERENCE ID (USE IN TRANSFER)</div>
+                        <div class="ref-value" th:text="${booking.bookingId}">#ADB-2024-001</div>
+                    </div>
+
+                    <!-- Upload Bank Slip Section -->
+                    <div class="upload-section">
+                        <div class="form-section-title">Upload Bank Slip</div>
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-icon">📄</div>
+                            <div class="upload-text">Click to upload or drag & drop</div>
+                            <div class="upload-subtext">Upload screenshot of bank transfer receipt</div>
+                            <input type="file" id="fileInput" name="bankSlip" class="file-input" accept="image/*">
+                        </div>
+                        <div class="uploaded-file" id="uploadedFile">
+                            <div class="file-info">
+                                <span class="file-name" id="fileName"></span>
+                                <button type="button" class="file-remove" onclick="removeFile()">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="submit-button" id="submitBtn" disabled>
+                            PROCESS PAYMENT
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Right Column: Hero Visual with Blob -->
+            <div class="bank-hero-column">
+                <div class="hero-blob">
+                    <svg viewBox="0 0 200 200" class="blob-svg">
+                        <path d="M40,50 Q60,20 90,40 T140,50 Q160,80 140,110 T90,130 Q60,150 40,120 Q20,90 40,50 Z" 
+                              fill="none" 
+                              stroke="rgba(255,255,255,0.06)" 
+                              stroke-width="1.5"/>
+                    </svg>
+                </div>
+                
+                <div class="hero-content">
+                    <h1 class="hero-heading">
+                        <span class="heading-line">BANK</span>
+                        <span class="heading-line">TRANSFER</span>
+                    </h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bank Slip Upload Script -->
+    <script>
+        let selectedFile = null;
+
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadedFile = document.getElementById('uploadedFile');
+        const fileName = document.getElementById('fileName');
+        const submitBtn = document.getElementById('submitBtn');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            if (file.type.startsWith('image/')) {
+                selectedFile = file;
+                fileName.textContent = file.name;
+                uploadedFile.classList.add('show');
+                submitBtn.disabled = false;
+            } else {
+                alert('Please select an image file.');
+            }
+        }
+
+        function removeFile() {
+            selectedFile = null;
+            uploadedFile.classList.remove('show');
+            submitBtn.disabled = true;
+            fileInput.value = '';
+        }
+    </script>
+
+</th:block>
+</html>

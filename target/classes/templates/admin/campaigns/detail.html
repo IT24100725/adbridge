@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head" style="display:flex;justify-content:space-between;align-items:center;gap:1rem;">
+        <h1 class="page-title">Campaign</h1>
+        <a class="btn" th:href="@{/admin/campaigns}">Back</a>
+    </div>
+
+    <div class="card">
+        <h3>Campaign Information</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+                <div><strong>Campaign ID:</strong> <span th:text="${campaign.id}">CMP-001</span></div>
+                <div><strong>Booking ID:</strong> <span th:text="${campaign.bookingId}">BK-0001</span></div>
+                <div><strong>Payment ID:</strong> <span th:text="${payment?.paymentId ?: 'N/A'}">PM-0001</span></div>
+                <div><strong>Client Name:</strong> <span th:text="${campaign.fullName}">John Doe</span></div>
+                <div><strong>Email:</strong> <span th:text="${campaign.email}">john@example.com</span></div>
+                <div><strong>Contact:</strong> <span th:text="${campaign.contactNumber}">+1234567890</span></div>
+            </div>
+            <div>
+                <div><strong>Company:</strong> <span th:text="${campaign.companyName ?: 'N/A'}">Company Name</span></div>
+                <div><strong>Service Type:</strong> <span th:text="${campaign.serviceType}">TV_ADVERTISEMENT</span></div>
+                <div><strong>Total Amount:</strong> <span th:text="${campaign.totalAmount != null ? #numbers.formatInteger(campaign.totalAmount, 0, 'COMMA') + ' LKR' : 'N/A'}">10,000 LKR</span></div>
+                <div><strong>Payment Date:</strong> <span th:text="${payment?.createdAt != null ? #temporals.format(payment.createdAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">2025-01-01 10:00</span></div>
+                <div><strong>Payment Status:</strong> 
+                    <span class="badge" 
+                          th:class="${payment?.paymentStatus?.name() == 'PENDING'} ? 'badge warning' : 
+                                   (${payment?.paymentStatus?.name() == 'COMPLETED'} ? 'badge success' : 
+                                   (${payment?.paymentStatus?.name() == 'CANCELLED'} ? 'badge danger' : 'badge'))"
+                          th:text="${payment?.paymentStatus ?: 'N/A'}">PENDING</span>
+                </div>
+                <div><strong>Campaign Status:</strong> 
+                    <span class="badge" 
+                          th:class="${campaign.campaignStatus == 'PENDING'} ? 'badge warning' : 
+                                   (${campaign.campaignStatus == 'APPROVED'} ? 'badge success' : 
+                                   (${campaign.campaignStatus == 'REJECTED'} ? 'badge danger' : 'badge'))"
+                          th:text="${campaign.campaignStatus ?: 'N/A'}">PENDING</span>
+                </div>
+            </div>
+        </div>
+        
+        <div th:if="${campaign.notes != null and !campaign.notes.isEmpty()}" style="margin-top: 1rem; padding: 1rem; background-color: #f8f9fa; border-radius: 4px;">
+            <strong>Notes:</strong>
+            <div th:text="${campaign.notes}" style="margin-top: 0.5rem; white-space: pre-wrap;"></div>
+        </div>
+    </div>
+
+
+    <footer class="admin-footer-sticky">
+        © 2025 AdBridgeLanka · Admin
+    </footer>
+</section>
+</html>
+
+
+
+
+
+
+
+

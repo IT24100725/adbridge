@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head">
+        <h1 class="page-title" th:text="${pageHeading}">CLIENT PROFILE</h1>
+        <a class="btn" th:href="@{/admin/clients}">Back</a>
+    </div>
+
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+            <h3 style="margin:0;">Client Information</h3>
+            <div>
+                <a class="btn xs" th:href="@{'/admin/clients/' + ${client.id} + '/edit'}">Edit Client</a>
+            </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+                <div><strong>Name:</strong> <span th:text="${client.fullName}">Name</span></div>
+                <div><strong>Email:</strong> <span th:text="${client.email}">email</span></div>
+                <div><strong>Phone:</strong> <span th:text="${client.phone}">phone</span></div>
+                <div><strong>Company:</strong> <span th:text="${client.companyName}">company</span></div>
+            </div>
+            <div>
+                <div><strong>Status:</strong> 
+                    <span th:switch="${client.status}" class="status-badge">
+                        <span th:case="'ACTIVE'" class="badge active">ACTIVE</span>
+                        <span th:case="'INACTIVE'" class="badge inactive">INACTIVE</span>
+                        <span th:case="'VIP'" class="badge vip">VIP</span>
+                        <span th:case="'SUSPENDED'" class="badge suspended">SUSPENDED</span>
+                        <span th:case="null" class="badge active">ACTIVE</span>
+                    </span>
+                </div>
+                <div><strong>Username:</strong> <span th:text="${client.username}">username</span></div>
+                <div><strong>Password:</strong> <span th:text="${client.password}">password</span></div>
+                <div><strong>Bookings:</strong> <span th:text="${#lists.size(bookings)}">0</span></div>
+                <div><strong>Payments:</strong> <span th:text="${paymentCount}">0</span></div>
+                <div><strong>Support Tickets:</strong> <span th:text="${ticketCount}">0</span></div>
+            </div>
+        </div>
+        
+        <div th:if="${client.internalNotes != null and !client.internalNotes.isEmpty()}" style="margin-top: 1rem; padding: 1rem; background-color: #f8f9fa; border-radius: 4px;">
+            <strong>Internal Notes:</strong>
+            <div th:text="${client.internalNotes}" style="margin-top: 0.5rem; white-space: pre-wrap;"></div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top:1rem;">
+        <h3 style="margin:0 0 .6rem 0;">Bookings</h3>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Booking ID</th>
+                <th>Service</th>
+                <th>Total</th>
+                <th>Payment</th>
+                <th>Approval</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="b : ${bookings}">
+                <td th:text="${b.bookingId}">BK-0001</td>
+                <td th:text="${b.serviceType}">TV</td>
+                <td th:text="${b.totalAmount} ?: '-'">-</td>
+                <td th:text="${b.paymentStatus} ?: 'PENDING'">PENDING</td>
+                <td th:text="${b.paymentStatus} ?: 'PENDING'">PENDING</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(bookings)}">
+                <td colspan="5" class="muted center">NO BOOKINGS.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Communication History Section -->
+    <div class="card" style="margin-top:1rem;">
+        <h3 style="margin:0 0 .6rem 0;">Communication History</h3>
+        
+        <!-- Add Communication Form -->
+        <div style="margin-bottom: 1rem; padding: 1rem; background-color: #f8f9fa; border-radius: 4px;">
+            <form th:action="@{'/admin/clients/' + ${client.id} + '/communication'}" method="post">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <label for="type">Type</label>
+                        <select id="type" name="type" required>
+                            <option value="">Select Type</option>
+                            <option th:each="type : ${communicationTypes}" 
+                                    th:value="${type}" 
+                                    th:text="${type}">CALL</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="staffMember">Staff Member</label>
+                        <input type="text" id="staffMember" name="staffMember" required 
+                               placeholder="Your name">
+                    </div>
+                    <div>
+                        <label for="subject">Subject</label>
+                        <input type="text" id="subject" name="subject" required 
+                               placeholder="Brief subject">
+                    </div>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" rows="3" required 
+                              placeholder="Details of the communication..."></textarea>
+                </div>
+                <button type="submit" class="btn primary">Add Communication</button>
+            </form>
+        </div>
+        
+        <!-- Communication List -->
+        <div th:if="${!communications.isEmpty()}">
+            <div th:each="comm : ${communications}" style="border-bottom: 1px solid #eee; padding: 1rem 0;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                    <div>
+                        <strong th:text="${comm.subject}">Subject</strong>
+                        <span class="badge" th:classappend="${comm.type.name() == 'CALL'} ? 'call' : 
+                                                   (${comm.type.name() == 'EMAIL'} ? 'email' : 
+                                                   (${comm.type.name() == 'MEETING'} ? 'meeting' : 'other'))"
+                              th:text="${comm.type}">CALL</span>
+                    </div>
+                    <div class="muted" th:text="${#temporals.format(comm.createdAt, 'MMM dd, yyyy HH:mm')}">Jan 15, 2025 10:30</div>
+                </div>
+                <div th:text="${comm.description}" style="margin-bottom: 0.5rem;"></div>
+                <div class="muted" style="font-size: 0.9em;">
+                    By: <span th:text="${comm.staffMember}">Staff Member</span>
+                </div>
+            </div>
+        </div>
+        <div th:if="${communications.isEmpty()}" class="muted center" style="padding: 2rem;">
+            No communication history yet.
+        </div>
+    </div>
+
+    <footer class="admin-footer-sticky">
+        © 2025 AdBridgeLanka · Admin
+    </footer>
+    
+    <style>
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.7em;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-left: 0.5rem;
+        }
+        .badge.call {
+            background-color: #3498db;
+            color: white;
+        }
+        .badge.email {
+            background-color: #9b59b6;
+            color: white;
+        }
+        .badge.meeting {
+            background-color: #e67e22;
+            color: white;
+        }
+        .badge.other {
+            background-color: #95a5a6;
+            color: white;
+        }
+        .badge.active {
+            background-color: #27ae60;
+            color: white;
+        }
+        .badge.inactive {
+            background-color: #95a5a6;
+            color: white;
+        }
+        .badge.vip {
+            background-color: #f39c12;
+            color: white;
+        }
+        .badge.suspended {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .status-badge {
+            display: inline-block;
+        }
+    </style>
+</section>
+</html>
+
+
+
+
+
+

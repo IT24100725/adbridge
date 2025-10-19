@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head">
+        <h1 class="page-title" th:text="${pageHeading}">Payments Management</h1>
+        <div>
+            <a class="btn" th:href="@{/admin/dashboard}">← Dashboard</a>
+        </div>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <!-- Modern Search Bar -->
+    <div class="card">
+        <div class="modern-search-bar">
+            <form th:action="@{/admin/payments}" method="get" class="search-form">
+                <div class="search-input-container">
+                    <input type="text" 
+                           name="search" 
+                           placeholder="Search payments..." 
+                           th:value="${search}"
+                           class="pill-search-input"
+                           id="searchInput">
+                    <button type="button" class="search-clear-btn" onclick="clearSearch()" th:if="${search != null and !search.trim().isEmpty()}">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                
+                <div class="sort-dropdown-container">
+                    <select name="status" class="sort-dropdown" onchange="this.form.submit()">
+                        <option value="">All Status</option>
+                        <option value="PENDING" th:selected="${status?.name() == 'PENDING'}">PENDING</option>
+                        <option value="PROCESSING" th:selected="${status?.name() == 'PROCESSING'}">PROCESSING</option>
+                        <option value="COMPLETED" th:selected="${status?.name() == 'COMPLETED'}">COMPLETED</option>
+                        <option value="FAILED" th:selected="${status?.name() == 'FAILED'}">FAILED</option>
+                        <option value="CANCELLED" th:selected="${status?.name() == 'CANCELLED'}">CANCELLED</option>
+                        <option value="REFUNDED" th:selected="${status?.name() == 'REFUNDED'}">REFUNDED</option>
+                        <option value="PENDING_CASH" th:selected="${status?.name() == 'PENDING_CASH'}">PENDING_CASH</option>
+                        <option value="PENDING_BANK_TRANSFER" th:selected="${status?.name() == 'PENDING_BANK_TRANSFER'}">PENDING_BANK_TRANSFER</option>
+                    </select>
+                </div>
+                
+                <div class="sort-dropdown-container">
+                    <select name="method" class="sort-dropdown" onchange="this.form.submit()">
+                        <option value="">All Methods</option>
+                        <option value="CARD" th:selected="${method?.name() == 'CARD'}">CARD</option>
+                        <option value="BANK_TRANSFER" th:selected="${method?.name() == 'BANK_TRANSFER'}">BANK_TRANSFER</option>
+                        <option value="CASH" th:selected="${method?.name() == 'CASH'}">CASH</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="search-submit-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                </button>
+            </form>
+        </div>
+
+    <!-- Payments List -->
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3>Payments <span th:text="'(' + ${#lists.size(payments)} + ')'">(0)</span></h3>
+            <div style="display: flex; gap: 10px;">
+                <a th:href="@{/admin/payments/export/csv?status={status}&method={method}&search={search}(status=${status}, method=${method}, search=${search})}" 
+                   class="btn secondary">📄 Export CSV</a>
+                <a th:href="@{/admin/payments/export/pdf?status={status}&method={method}&search={search}(status=${status}, method=${method}, search=${search})}" 
+                   class="btn secondary">📄 Export PDF</a>
+            </div>
+        </div>
+
+        <div th:if="${payments != null and !#lists.isEmpty(payments)}">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Payment ID</th>
+                    <th>Booking ID</th>
+                    <th>Amount</th>
+                    <th>Method</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="payment : ${payments}">
+                    <td>
+                        <a th:href="@{'/admin/payments/' + ${payment.id}}" th:text="${payment.paymentId}">PM-0001</a>
+                        <span th:if="${payment.deleted == true}" class="badge danger" style="margin-left: 5px;">DELETED</span>
+                    </td>
+                    <td>
+                        <a th:href="@{'/admin/clients/detail?search=' + ${payment.bookingId}}" th:text="${payment.bookingId}">BK-0001</a>
+                    </td>
+                    <td>
+                        <span th:text="${payment.amount != null ? #numbers.formatInteger(payment.amount, 0, 'COMMA') + ' ' + payment.currency : 'N/A'}">10,000 LKR</span>
+                    </td>
+                    <td>
+                        <span class="badge" th:text="${payment.paymentMethod}">CARD</span>
+                    </td>
+                    <td>
+                        <span class="badge" 
+                              th:class="${payment.paymentStatus.name() == 'COMPLETED'} ? 'badge success' : 
+                                       (${payment.paymentStatus.name() == 'FAILED' or payment.paymentStatus.name() == 'CANCELLED'} ? 'badge danger' : 
+                                       (${payment.paymentStatus.name() == 'REFUNDED'} ? 'badge warning' : 'badge'))"
+                              th:text="${payment.paymentStatus}">PENDING</span>
+                    </td>
+                    <td th:text="${#temporals.format(payment.createdAt, 'yyyy-MM-dd HH:mm')}">2025-01-01 10:00</td>
+                    <td>
+                        <div style="display: flex; gap: 5px;">
+                            <a th:href="@{'/admin/payments/' + ${payment.id}}" class="btn small">View</a>
+                            
+                            <!-- Quick Actions -->
+                            <form th:if="${(adminRole?.name() == 'FINANCE' or adminRole?.name() == 'DIRECTOR' or adminRole?.name() == 'SUPER_ADMIN') and 
+                                          payment.paymentStatus.name() != 'COMPLETED' and payment.paymentStatus.name() != 'CANCELLED' and 
+                                          payment.paymentStatus.name() != 'REFUNDED' and payment.paymentStatus.name() != 'PENDING' and payment.deleted != true}" 
+                                  th:action="@{'/admin/payments/' + ${payment.id} + '/confirm'}" method="post" style="display:inline;">
+                                <input type="hidden" name="reason" value="Quick confirm from list">
+                                <button class="btn small success" type="submit">Confirm</button>
+                            </form>
+                            
+                            <form th:if="${(adminRole?.name() == 'FINANCE' or adminRole?.name() == 'DIRECTOR' or adminRole?.name() == 'SUPER_ADMIN') and 
+                                            payment.paymentStatus.name() != 'COMPLETED' and payment.paymentStatus.name() != 'CANCELLED' and 
+                                            payment.paymentStatus.name() != 'REFUNDED' and payment.deleted != true}" 
+                                  th:action="@{'/admin/payments/' + ${payment.id} + '/cancel'}" method="post" style="display:inline;">
+                                <button class="btn small danger" type="submit">Cancel</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div th:if="${payments == null or #lists.isEmpty(payments)}" class="muted center" style="padding: 40px;">
+            <h3>No payments found</h3>
+            <p>Try adjusting your filters or check back later.</p>
+        </div>
+    </div>
+
+    <!-- Quick Cancel Modal -->
+    <div id="quickCancelModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>Cancel Payment</h3>
+            <p>Are you sure you want to cancel this payment?</p>
+            <form id="quickCancelForm" method="post">
+                <div style="margin-bottom: 15px;">
+                    <label for="quickCancelReason">Reason for cancellation (required):</label>
+                    <textarea id="quickCancelReason" name="reason" required style="width: 100%; height: 60px;"></textarea>
+                </div>
+                <div style="text-align: right;">
+                    <button type="button" class="btn" onclick="hideQuickCancelModal()">Cancel</button>
+                    <button type="submit" class="btn danger">Confirm Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 500px;
+            width: 90%;
+        }
+        .badge.success { background-color: #28a745; color: white; }
+        .badge.danger { background-color: #dc3545; color: white; }
+        .badge.warning { background-color: #ffc107; color: black; }
+        .btn.small { padding: 4px 8px; font-size: 0.8em; }
+        .table th, .table td { padding: 8px; }
+    </style>
+
+    <script>
+        function quickCancel(paymentId) {
+            document.getElementById('quickCancelForm').action = '/admin/payments/' + paymentId + '/cancel';
+            document.getElementById('quickCancelModal').style.display = 'block';
+        }
+        
+        function hideQuickCancelModal() {
+            document.getElementById('quickCancelModal').style.display = 'none';
+            document.getElementById('quickCancelReason').value = '';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('quickCancelModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+
+    <footer class="admin-footer-sticky">
+        © 2025 AdBridgeLanka · Admin
+    </footer>
+    
+    <!-- JavaScript for Search Functionality -->
+    <script>
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.querySelector('.search-form').submit();
+        }
+    </script>
+</section>
+</html>

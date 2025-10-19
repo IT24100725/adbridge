@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head" style="display:flex; justify-content:space-between; align-items:center;">
+        <h1 class="page-title" th:text="${pageHeading}">Create New Task</h1>
+
+    </div>
+
+    <div class="form-container-v2">
+        <h2 class="form-v2-header">Task Details</h2>
+
+        <form th:action="@{/admin/tasks}" th:object="${task}" method="post" class="form-v2">
+            <!-- Hidden field for booking ID -->
+            <input type="hidden" th:if="${task.booking != null}" th:field="*{booking.id}" />
+
+            <!-- Left Column -->
+            <div>
+                <!-- Task Title -->
+                <div class="form-v2-group">
+                    <input type="text" id="title" th:field="*{title}" required class="form-v2-input" placeholder=" "/>
+                    <label for="title" class="form-v2-label">Task Title *</label>
+                </div>
+
+                <!-- Booking ID -->
+                <div th:if="${task.booking != null}">
+                    <div class="form-v2-group">
+                        <input type="text" th:value="${task.booking.bookingId}" disabled class="form-v2-input" placeholder=" "/>
+                        <label class="form-v2-label">Booking ID</label>
+                    </div>
+                </div>
+
+                <!-- Priority -->
+                <div class="form-v2-group">
+                    <select id="priority" th:field="*{priority}" required class="form-v2-input" onchange="this.setAttribute('data-placeholder-shown', this.value != '' ? 'false' : 'true');">
+                        <option value="" disabled selected hidden>Select Priority</option>
+                        <option value="HIGH">High</option>
+                        <option value="MEDIUM">Medium</option>
+                        <option value="LOW">Low</option>
+                    </select>
+                    <label for="priority" class="form-v2-label">Priority *</label>
+                </div>
+
+                <!-- Description -->
+                <div class="form-v2-group">
+                    <textarea id="description" th:field="*{description}" rows="4" class="form-v2-input" placeholder=" "></textarea>
+                    <label for="description" class="form-v2-label">Description</label>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div>
+                <!-- Assigned To -->
+                <div class="form-v2-group">
+                    <select id="assignedTo" name="assignedTo" required class="form-v2-input" onchange="this.setAttribute('data-placeholder-shown', this.value != '' ? 'false' : 'true');">
+                        <option value="" disabled selected hidden>-- Select Role --</option>
+                        <option th:each="role : ${staffRoles}" th:value="${role}" th:text="${role.replace('_', ' ')}" ></option>
+                    </select>
+                    <label for="assignedTo" class="form-v2-label">Assign To *</label>
+                </div>
+
+                <!-- Service -->
+                <div th:if="${task.booking != null}">
+                    <div class="form-v2-group">
+                        <input type="text" th:value="${task.booking.serviceType}" disabled class="form-v2-input" placeholder=" "/>
+                        <label class="form-v2-label">Service</label>
+                    </div>
+                </div>
+
+                <!-- Due Date -->
+                <div class="form-v2-group">
+                    <input type="date" id="dueDate" th:field="*{dueDate}"
+                           th:min="${campaignDeadline != null ? #temporals.format(bookedOn, 'yyyy-MM-dd') : ''}"
+                           th:max="${campaignDeadline != null ? #temporals.format(campaignDeadline, 'yyyy-MM-dd') : ''}"
+                           required class="form-v2-input" data-placeholder-shown="false">
+                    <label for="dueDate" class="form-v2-label">Due Date *</label>
+                </div>
+            </div>
+
+            <!-- Full Width Timeline -->
+            <div th:if="${campaignDeadline != null}" class="form-v2-group full-width">
+                <div class="alert-info" style="padding: 1rem; border-radius: var(--radius);">
+                    <p style="margin:0;"><strong>Campaign Timeline:</strong> This task is for a <strong th:text="${task.booking.serviceType.toString().replace('_', ' ')}"></strong> campaign. All tasks must be completed between <strong th:text="${#temporals.format(bookedOn, 'dd-MMM-yyyy')}"></strong> and <strong th:text="${#temporals.format(campaignDeadline, 'dd-MMM-yyyy')}"></strong>.</p>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-v2-actions">
+                <a th:href="${task.booking != null ? '/admin/campaigns/' + task.booking.id : '/admin/tasks'}" class="btn-v2">Cancel</a>
+                <button type="submit" class="btn-v2 primary">Save Task</button>
+            </div>
+        </form>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll('.form-v2-input[onchange*="data-placeholder-shown"]').forEach(select => {
+                select.setAttribute('data-placeholder-shown', select.value ? 'false' : 'true');
+            });
+        });
+        /*]]>*/
+    </script>
+</section>
+</html>

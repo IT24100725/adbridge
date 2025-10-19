@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+        <h1 class="page-title" th:text="${pageHeading}">CLIENTS</h1>
+        <div style="display:flex;gap:.5rem;align-items:center;">
+            <a th:if="${adminRole != null && adminRole.name() == 'SUPPORT'}" class="btn primary" th:href="@{/admin/clients/new}">+ New Client</a>
+            <form th:if="${adminRole != null && adminRole.name() == 'SUPER_ADMIN'}" th:action="@{/admin/clients/fix-passwords}" method="post" style="display:inline;">
+                <button type="submit" class="btn warning" onclick="return confirm('This will fix all user passwords. Continue?')">🔧 Fix Passwords</button>
+            </form>
+        </div>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+    
+    <!-- Modern Search Bar -->
+    <div class="modern-search-bar">
+        <form th:action="@{/admin/clients}" method="get" class="search-form">
+            <div class="search-input-container">
+                <input type="text" 
+                       name="q" 
+                       placeholder="Search clients..." 
+                       th:value="${q}"
+                       class="pill-search-input"
+                       id="searchInput">
+                <button type="button" class="search-clear-btn" onclick="clearSearch()" th:if="${q != null and !q.trim().isEmpty()}">
+                    <span>&times;</span>
+                </button>
+            </div>
+            
+            <div class="sort-dropdown-container">
+                <select name="sortBy" class="sort-dropdown" onchange="this.form.submit()">
+                    <option value="">All Approvals</option>
+                    <option value="approval_pending" th:selected="${sortBy == 'approval_pending'}">Pending</option>
+                    <option value="approval_approved" th:selected="${sortBy == 'approval_approved'}">Approved</option>
+                    <option value="approval_rejected" th:selected="${sortBy == 'approval_rejected'}">Rejected</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="search-submit-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+            </button>
+        </form>
+    </div>
+
+    <!-- Advanced Search and Filter Form -->
+    <div class="card" style="margin-bottom: 20px;">
+        <form th:action="@{/admin/clients}" method="get" style="display: flex; gap: 10px; align-items: end; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 200px;">
+                <label for="q">Search</label>
+                <input type="text" id="q" name="q" th:value="${q}"
+                       placeholder="Search by name, email, phone, or company">
+            </div>
+            <div>
+                <label for="status">Status</label>
+                <select id="status" name="status">
+                    <option value="">All Status</option>
+                    <option th:each="status : ${statusOptions}"
+                            th:value="${status}"
+                            th:text="${status}"
+                            th:selected="${currentStatus == status}">ACTIVE</option>
+                </select>
+            </div>
+            <div>
+                <label for="hasUnpaid">Payment Status</label>
+                <select id="hasUnpaid" name="hasUnpaid">
+                    <option value="">All</option>
+                    <option value="true" th:selected="${currentHasUnpaid == true}">Has Unpaid</option>
+                </select>
+            </div>
+            <div>
+                <label for="hasTickets">Support</label>
+                <select id="hasTickets" name="hasTickets">
+                    <option value="">All</option>
+                    <option value="true" th:selected="${currentHasTickets == true}">Has Tickets</option>
+                </select>
+            </div>
+            <div>
+                <button type="submit" class="btn">Search</button>
+                <a th:href="@{/admin/clients}" class="btn">Clear</a>
+            </div>
+        </form>
+
+        <!-- Test button for DIRECTOR role -->
+        <div th:if="${adminRole != null && adminRole.name() == 'DIRECTOR'}" style="margin-top: 10px;">
+            <form th:action="@{/admin/clients/test-set-pending}" method="post" style="display:inline;">
+                <button type="submit" class="btn warning">Set All to PENDING (Test)</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Contact Messages Section (SUPPORT role only) -->
+    <div th:if="${contacts != null and !contacts.isEmpty()}" class="card" style="margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="margin:0;">Contact Messages</h3>
+            <span class="badge" style="background-color: #e74c3c; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8em;">
+                <span th:text="${#lists.size(contacts)}">0</span> Messages
+            </span>
+        </div>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Subject</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="c : ${contacts}">
+                <td>
+                    <div th:text="${c.name}" style="font-weight: 600;">Name</div>
+                    <div th:if="${c.phone != null and !c.phone.isEmpty()}"
+                         th:text="${c.phone}"
+                         class="muted" style="font-size: 0.9em;">Phone</div>
+                </td>
+                <td th:text="${c.email}">email</td>
+                <td>
+                    <div th:text="${c.subject}">Subject</div>
+                    <div th:text="${#strings.abbreviate(c.message, 50)}"
+                         class="muted" style="font-size: 0.9em;">Message preview...</div>
+                </td>
+                <td th:text="${#temporals.format(c.createdAt, 'MMM dd, yyyy HH:mm')}">Jan 15, 2025</td>
+                <td>
+                    <span th:if="${!c.isRead}" class="badge unread">UNREAD</span>
+                    <span th:if="${c.isRead and !c.isReplied}" class="badge read">READ</span>
+                    <span th:if="${c.isReplied}" class="badge replied">REPLIED</span>
+                </td>
+                <td>
+                    <a class="btn xs" th:href="@{'/admin/clients/contact/' + ${c.id}}">View Message</a>
+                    <a th:if="${!c.isReplied}" class="btn xs primary"
+                       th:href="@{'/admin/clients/contact/' + ${c.id} + '/create-client'}">
+                        Create Client
+                    </a>
+                    <form th:if="${!c.isReplied}" th:action="@{'/admin/clients/contact/' + ${c.id} + '/mark-replied'}"
+                          method="post" style="display:inline;">
+                        <button class="btn xs" type="submit" onclick="return confirm('Mark this contact as replied?')">
+                            Mark Replied
+                        </button>
+                    </form>
+                    <a class="btn xs" th:href="@{'mailto:' + ${c.email} + '?subject=Re: ' + ${c.subject}}">
+                        Reply
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Company</th>
+                <th th:if="${adminRole == null || (adminRole.name() != 'ADMIN' and adminRole.name() != 'DIRECTOR')}">Status</th>
+                <th th:if="${adminRole == null || adminRole.name() != 'ADMIN'}">Approval</th>
+                <th th:if="${adminRole == null || adminRole.name() != 'ADMIN'}">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="c : ${clients}">
+                <td>
+                    <div th:text="${c.fullName}" style="font-weight: 600;">Name</div>
+                    <div class="muted" th:if="${c.internalNotes != null and !c.internalNotes.isEmpty()}"
+                         th:text="${#strings.abbreviate(c.internalNotes, 50)}"
+                         style="font-size: 0.9em;">Internal notes...</div>
+                </td>
+                <td th:text="${c.email}">email</td>
+                <td th:text="${c.phone}">phone</td>
+                <td th:text="${c.companyName}">company</td>
+                <td th:if="${adminRole == null || (adminRole.name() != 'ADMIN' and adminRole.name() != 'DIRECTOR')}">
+                    <span th:switch="${c.status}" class="status-badge">
+                        <span th:case="'ACTIVE'" class="badge active">ACTIVE</span>
+                        <span th:case="'INACTIVE'" class="badge inactive">INACTIVE</span>
+                        <span th:case="'VIP'" class="badge vip">VIP</span>
+                        <span th:case="'SUSPENDED'" class="badge suspended">SUSPENDED</span>
+                        <span th:case="null" class="badge active">ACTIVE</span>
+                    </span>
+                </td>
+                <td th:if="${adminRole == null || adminRole.name() != 'ADMIN'}">
+                    <span th:switch="${c.approvalStatus}" class="approval-badge">
+                        <span th:case="PENDING" class="badge warning">PENDING</span>
+                        <span th:case="APPROVED" class="badge success">APPROVED</span>
+                        <span th:case="REJECTED" class="badge danger">REJECTED</span>
+                        <span th:case="null" class="badge warning">PENDING</span>
+                        <span th:case="*" class="badge warning">PENDING</span>
+                    </span>
+                </td>
+                <td>
+                    <!-- Action buttons - Hidden for Admin Assistant -->
+                    <div th:if="${adminRole == null || adminRole.name() != 'ADMIN'}">
+                        <a class="btn xs" th:href="@{'/admin/clients/' + ${c.userId}}">View</a>
+                        <a class="btn xs" th:href="@{'/admin/clients/' + ${c.userId} + '/edit'}">Edit</a>
+
+                        <form th:action="@{'/admin/clients/' + ${c.userId} + '/delete'}" method="post" style="display:inline;" onsubmit="return confirm('Delete this client?')">
+                            <button class="btn xs danger" type="submit">Delete</button>
+                        </form>
+                    </div>
+
+                    <!-- Approval buttons for DIRECTOR role - Hidden for Admin Assistant -->
+                    <div th:if="${adminRole != null && adminRole.name() == 'DIRECTOR'}" style="display: inline-block; margin-left: 5px;">
+                        <form th:action="@{'/admin/clients/' + ${c.userId} + '/approve'}" method="post" style="display:inline;">
+                            <button type="submit" class="btn xs success">Approve</button>
+                        </form>
+                        <form th:action="@{'/admin/clients/' + ${c.userId} + '/reject'}" method="post" style="display:inline;" onsubmit="return confirm('Reject this client?')">
+                            <button type="submit" class="btn xs danger">Reject</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(clients)}">
+                <td th:colspan="${adminRole != null && adminRole.name() == 'ADMIN'} ? 4 : 7" class="muted center">NO CLIENTS FOUND.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <style>
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge.active {
+            background-color: #27ae60;
+            color: white;
+        }
+        .badge.inactive {
+            background-color: #95a5a6;
+            color: white;
+        }
+        .badge.vip {
+            background-color: #f39c12;
+            color: white;
+        }
+        .badge.suspended {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .badge.pending {
+            background-color: #f39c12;
+            color: white;
+        }
+        .badge.approved {
+            background-color: #27ae60;
+            color: white;
+        }
+        .badge.rejected {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .btn.warning {
+            background-color: #f39c12;
+            color: white;
+        }
+        .status-badge {
+            display: inline-block;
+        }
+        .badge.unread {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .badge.read {
+            background-color: #3498db;
+            color: white;
+        }
+        .badge.replied {
+            background-color: #27ae60;
+            color: white;
+        }
+    </style>
+    
+    <!-- JavaScript for Search Functionality -->
+    <script>
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.querySelector('.search-form').submit();
+        }
+    </script>
+</section>
+</html>

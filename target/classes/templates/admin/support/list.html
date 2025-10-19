@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+        <h1 class="page-title" th:text="${pageHeading}">SUPPORT REQUESTS</h1>
+        <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;">
+            <!-- Express Bookings PDF Only -->
+            <div style="display:flex;align-items:center;gap:.3rem;" 
+                 th:if="${adminRole != null and (adminRole.name() == 'SUPPORT' or adminRole.name() == 'SUPER_ADMIN')}">
+                <a class="btn secondary" th:href="@{/admin/support/reports/express-bookings/pdf}">📄 Express PDF</a>
+            </div>
+            
+            <!-- Cancellation PDF Only -->
+            <div style="display:flex;align-items:center;gap:.3rem;" 
+                 th:if="${adminRole != null and (adminRole.name() == 'SUPPORT' or adminRole.name() == 'SUPER_ADMIN')}">
+                <a class="btn secondary" th:href="@{/admin/support/reports/cancellations/pdf}">📄 Cancel PDF</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modern Search Bar -->
+    <div class="modern-search-bar">
+        <form th:action="@{/admin/support}" method="get" class="search-form">
+            <div class="search-input-container">
+                <input type="text" 
+                       name="q" 
+                       placeholder="Search tickets..." 
+                       th:value="${q}"
+                       class="pill-search-input"
+                       id="searchInput">
+                <button type="button" class="search-clear-btn" onclick="clearSearch()" th:if="${q != null and !q.trim().isEmpty()}">
+                    <span>&times;</span>
+                </button>
+            </div>
+            
+            <div class="sort-dropdown-container">
+                <select name="sortBy" class="sort-dropdown" onchange="this.form.submit()">
+                    <option value="">All Priorities</option>
+                    <option value="priority_high" th:selected="${sortBy == 'priority_high'}">High Priority</option>
+                    <option value="priority_medium" th:selected="${sortBy == 'priority_medium'}">Medium Priority</option>
+                    <option value="priority_low" th:selected="${sortBy == 'priority_low'}">Low Priority</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="search-submit-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+            </button>
+        </form>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+    
+    <style>
+        .booking-link {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .booking-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+
+
+    <div class="card">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Client</th>
+                <th>Subject</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Assigned</th>
+                <th>Booking</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="t : ${tickets}">
+                <td>
+                    <div th:text="${t.clientName}">Name</div>
+                    <div class="muted" th:text="${t.clientEmail}">email</div>
+                </td>
+                <td th:text="${t.subject}">Subject</td>
+                <td th:text="${t.priority}">MEDIUM</td>
+                <td th:text="${t.status}">OPEN</td>
+                <td th:text="${t.assignedTo}">staff</td>
+                <td>
+                    <span th:if="${t.bookingId != null and !t.bookingId.trim().isEmpty()}">
+                        <a th:href="@{'/admin/campaigns?search=' + ${t.bookingId}}" 
+                           th:text="${t.bookingId}" 
+                           class="booking-link" 
+                           target="_blank">BK-0001</a>
+                    </span>
+                    <span th:if="${t.bookingId == null or t.bookingId.trim().isEmpty()}" class="muted">-</span>
+                </td>
+                <td>
+                    <!-- Managing Director Actions -->
+                    <div th:if="${adminRole != null and adminRole.name() == 'DIRECTOR'}">
+                        <!-- Show "Mark as Complete" for IN_PROGRESS status with express action -->
+                        <div th:if="${t.status.name() == 'IN_PROGRESS' and t.expressAction != null}">
+                            <form th:action="@{'/admin/support/mark-complete/' + ${t.id}}" method="post" style="display: inline;">
+                                <button class="btn xs success" type="submit" 
+                                        onclick="return confirm('Mark this ticket as complete and forward to Client Support Officer?')">
+                                    Mark as Complete
+                                </button>
+                            </form>
+                        </div>
+                        <!-- Show "Done" badge for RESOLVED express tickets -->
+                        <span th:if="${t.status.name() == 'RESOLVED' and t.expressAction != null}" class="badge success">
+                            ✓ Done
+                        </span>
+                        <!-- Show "View Details" for OPEN tickets or non-express tickets -->
+                        <a class="btn xs" th:href="@{'/admin/support/' + ${t.id}}" 
+                           th:if="${(t.status.name() == 'OPEN' or t.expressAction == null) and t.status.name() != 'RESOLVED'}">View Details</a>
+                    </div>
+                    
+                    <!-- CSO Actions for completed express tickets -->
+                    <div th:if="${adminRole != null and adminRole.name() == 'SUPPORT' and t.status.name() == 'RESOLVED' and t.expressAction != null}">
+                        <div th:if="${t.notificationSent == null or !t.notificationSent}">
+                            <form th:action="@{'/admin/support/send-notification/' + ${t.id}}" method="post" style="display: inline;">
+                                <button class="btn xs success" type="submit" 
+                                        onclick="return confirm('Send notification to client about ' + '${t.expressAction}' + ' booking?')">
+                                    Send to Client
+                                </button>
+                            </form>
+                        </div>
+                        <div th:if="${t.notificationSent != null and t.notificationSent}" class="muted">
+                            Notification Sent
+                        </div>
+                    </div>
+                    
+                    <!-- Other roles can edit -->
+                    <span th:if="${adminRole != null and (adminRole.name() == 'SUPPORT' or adminRole.name() == 'SUPER_ADMIN') and (t.status.name() != 'RESOLVED' or t.expressAction == null)}">
+                        <a class="btn xs" th:href="@{'/admin/support/' + ${t.id} + '/edit'}">Edit</a>
+                        <form th:action="@{'/admin/support/' + ${t.id} + '/delete'}" method="post" style="display:inline;" onsubmit="return confirm('Delete this ticket?')">
+                            <button class="btn xs danger" type="submit">Delete</button>
+                        </form>
+                    </span>
+                    
+                    <!-- Default view for other roles -->
+                    <a class="btn xs" th:href="@{'/admin/support/' + ${t.id} + '/edit'}" 
+                       th:if="${adminRole == null or (adminRole.name() != 'DIRECTOR' and adminRole.name() != 'SUPPORT' and adminRole.name() != 'SUPER_ADMIN')}">View</a>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(tickets)}">
+                <td colspan="7" class="muted center">NO SUPPORT REQUESTS.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Express Booking Requests Section (CSO Only) -->
+    <div th:if="${adminRole != null and (adminRole.name() == 'SUPPORT' or adminRole.name() == 'SUPER_ADMIN')}" 
+         class="card" style="margin-top: 20px;">
+        <div class="card-header">
+            <h3>Re-Approval Requests</h3>
+            <p class="muted">Rejected booking re-approval requests from users</p>
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Client</th>
+                    <th>Request Type</th>
+                    <th>Booking ID</th>
+                    <th>Reason</th>
+                    <th>Created</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="booking : ${expressBookings}">
+                    <td>
+                        <div th:text="${booking.name}">Client Name</div>
+                        <div class="muted" th:text="${booking.email}">email</div>
+                    </td>
+                    <td>
+                        <span th:if="${booking.requestType == 'CANCEL_BOOKING'}" class="badge warning">Cancel Booking</span>
+                        <span th:if="${booking.requestType == 'REJECTED_BOOKING_REQUEST'}" class="badge danger">Rejection Request</span>
+                    </td>
+                    <td>
+                        <span th:if="${booking.bookingId != null and !booking.bookingId.trim().isEmpty()}" 
+                              th:text="${booking.bookingId}" class="booking-link">ADB-123</span>
+                        <span th:if="${booking.bookingId == null or booking.bookingId.trim().isEmpty()}" class="muted">-</span>
+                    </td>
+                    <td th:text="${booking.requestReason}">Reason</td>
+                    <td th:text="${#temporals.format(booking.createdAt, 'MMM dd, yyyy HH:mm')}">Jan 01, 2025</td>
+                    <td>
+                        <span th:if="${booking.ticketCreated == null or !booking.ticketCreated}" class="badge info">Pending MD Action</span>
+                        <span th:if="${booking.ticketCreated != null and booking.ticketCreated}" class="badge success">Ticket Created</span>
+                    </td>
+                    <td>
+                        <div th:if="${booking.ticketCreated == null or !booking.ticketCreated}">
+                            <a class="btn xs primary" th:href="@{'/admin/support/new?contactId=' + ${booking.id}}">
+                                Create Ticket
+                            </a>
+                            <form th:action="@{'/admin/clients/contact/' + ${booking.id} + '/mark-replied'}" method="post" style="display:inline;">
+                                <button class="btn xs" type="submit">Dismiss</button>
+                            </form>
+                        </div>
+                        <span th:if="${booking.ticketCreated != null and booking.ticketCreated}" class="muted">Ticket Already Created</span>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(expressBookings)}">
+                    <td colspan="7" class="muted center">NO EXPRESS BOOKING REQUESTS.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Cancel Booking Requests Section (CSO Only) -->
+    <div th:if="${adminRole != null and (adminRole.name() == 'SUPPORT' or adminRole.name() == 'SUPER_ADMIN')}" 
+         class="card" style="margin-top: 20px;">
+        <div class="card-header">
+            <h3>Cancel Booking Requests</h3>
+            <p class="muted">Booking cancellation requests from users</p>
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Client</th>
+                    <th>Booking ID</th>
+                    <th>Reason</th>
+                    <th>Created</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="cancel : ${cancelBookings}">
+                    <td>
+                        <div th:text="${cancel.name}">Client Name</div>
+                        <div class="muted" th:text="${cancel.email}">email</div>
+                    </td>
+                    <td>
+                        <span th:if="${cancel.bookingId != null and !cancel.bookingId.trim().isEmpty()}" 
+                              th:text="${cancel.bookingId}" class="booking-link">ADB-123</span>
+                        <span th:if="${cancel.bookingId == null or cancel.bookingId.trim().isEmpty()}" class="muted">-</span>
+                    </td>
+                    <td th:text="${cancel.requestReason}">Reason</td>
+                    <td th:text="${#temporals.format(cancel.createdAt, 'MMM dd, yyyy HH:mm')}">Jan 01, 2025</td>
+                    <td>
+                        <span th:if="${cancel.ticketCreated == null or !cancel.ticketCreated}" class="badge warning">Pending MD Action</span>
+                        <span th:if="${cancel.ticketCreated != null and cancel.ticketCreated}" class="badge success">Ticket Created</span>
+                    </td>
+                    <td>
+                        <div th:if="${cancel.ticketCreated == null or !cancel.ticketCreated}">
+                            <a class="btn xs primary" th:href="@{'/admin/support/new?contactId=' + ${cancel.id}}">
+                                Create Ticket
+                            </a>
+                            <form th:action="@{'/admin/clients/contact/' + ${cancel.id} + '/mark-replied'}" method="post" style="display:inline;">
+                                <button class="btn xs" type="submit">Dismiss</button>
+                            </form>
+                        </div>
+                        <span th:if="${cancel.ticketCreated != null and cancel.ticketCreated}" class="muted">Ticket Already Created</span>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(cancelBookings)}">
+                    <td colspan="6" class="muted center">NO CANCEL BOOKING REQUESTS.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <footer class="admin-footer-sticky">
+        © 2025 AdBridgeLanka · Admin
+    </footer>
+    
+    <!-- JavaScript for Search Functionality -->
+    <script>
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.querySelector('.search-form').submit();
+        }
+    </script>
+</section>
+</html>
+
+

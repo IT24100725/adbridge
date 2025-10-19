@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head">
+        <h1 class="page-title">Invoice</h1>
+        <a class="btn" th:href="@{/admin/invoices}">Back</a>
+    </div>
+
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+            <h3 style="margin:0;">Invoice Details</h3>
+            <div>
+                <span th:switch="${invoice.status}" class="status-badge">
+                    <span th:case="'DRAFT'" class="badge draft">DRAFT</span>
+                    <span th:case="'ISSUED'" class="badge issued">ISSUED</span>
+                    <span th:case="'PAID'" class="badge paid">PAID</span>
+                    <span th:case="'CANCELLED'" class="badge cancelled">CANCELLED</span>
+                </span>
+            </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+                <div><strong>Invoice ID:</strong> <span th:text="${invoice.invoiceId}" style="font-weight: 600;">INV-XXXX</span></div>
+                <div><strong>Booking ID:</strong> <a th:href="@{'/admin/campaigns?search=' + ${invoice.bookingId}}" th:text="${invoice.bookingId}" style="color: #007bff;">BK-0001</a></div>
+                <div><strong>Created:</strong> <span th:text="${#temporals.format(invoice.createdAt, 'MMM dd, yyyy HH:mm')}">Jan 15, 2025 10:30</span></div>
+            </div>
+            <div>
+                <div><strong>Amount:</strong> <span th:text="${invoice.amount}" style="font-weight: 600; font-size: 1.2em;">0</span> <span th:text="${invoice.currency}">LKR</span></div>
+                <div th:if="${invoice.dueDate != null}"><strong>Due Date:</strong> <span th:text="${#temporals.format(invoice.dueDate, 'MMM dd, yyyy')}">Jan 31, 2025</span></div>
+                <div><strong>Status:</strong> <span th:text="${invoice.status}">ISSUED</span></div>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <div><strong>Client Information:</strong></div>
+            <div style="margin-left: 1rem; margin-top: 0.5rem;">
+                <div><strong>Name:</strong> <span th:text="${invoice.clientName}">Name</span></div>
+                <div><strong>Email:</strong> <span th:text="${invoice.clientEmail}">email</span></div>
+            </div>
+        </div>
+        
+        <div th:if="${invoice.notes != null and !invoice.notes.isEmpty()}" style="margin-top: 1rem; padding: 1rem; background-color: #f8f9fa; border-radius: 4px;">
+            <strong>Notes:</strong>
+            <div th:text="${invoice.notes}" style="margin-top: 0.5rem; white-space: pre-wrap;"></div>
+        </div>
+    </div>
+
+    <footer class="admin-footer-sticky">
+        © 2025 AdBridgeLanka · Admin
+    </footer>
+    
+    <style>
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge.draft {
+            background-color: #95a5a6;
+            color: white;
+        }
+        .badge.issued {
+            background-color: #3498db;
+            color: white;
+        }
+        .badge.paid {
+            background-color: #27ae60;
+            color: white;
+        }
+        .badge.cancelled {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .status-badge {
+            display: inline-block;
+        }
+    </style>
+</section>
+</html>
+
+
+
+
+
+

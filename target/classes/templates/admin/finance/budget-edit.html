@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head">
+        <h1 class="page-title">Edit Budget</h1>
+        <a class="btn" th:href="@{/admin/finance}">Back</a>
+    </div>
+
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <div class="form-container-v2">
+        <h2 class="form-v2-header">Edit Budget</h2>
+        <form th:action="@{'/admin/finance/budgets/' + ${budget.id} + '/edit'}" 
+              th:object="${budget}" method="post" class="form-v2">
+            <div class="form-v2-group full-width">
+                <input type="text" th:field="*{name}" class="form-v2-input" placeholder=" " required>
+                <label class="form-v2-label">Budget Name *</label>
+            </div>
+            <div class="form-v2-group full-width">
+                <textarea th:field="*{description}" class="form-v2-input" placeholder=" " rows="3"></textarea>
+                <label class="form-v2-label">Description</label>
+            </div>
+            <div class="form-v2-group">
+                <input type="number" th:field="*{amount}" min="0" step="1" class="form-v2-input" placeholder=" " required>
+                <label class="form-v2-label">Amount (LKR) *</label>
+            </div>
+            <div class="form-v2-actions">
+                <button type="submit" class="btn-v2 primary">Update Budget</button>
+                <a class="btn-v2" th:href="@{/admin/finance}">Cancel</a>
+            </div>
+        </form>
+    </div>
+    
+    <footer class="admin-footer-sticky">
+        © 2025 AdBridgeLanka · Admin
+    </footer>
+</section>
+</html>
+
+

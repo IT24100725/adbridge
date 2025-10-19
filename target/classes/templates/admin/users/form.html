@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head">
+        <h1 class="page-title" th:text="${pageHeading}">USER FORM</h1>
+    </div>
+
+    <div th:if="${flashMsg}" class="alert success" th:text="${flashMsg}"></div>
+    <div th:if="${errorMsg}" class="alert danger" th:text="${errorMsg}"></div>
+
+    <div class="card">
+        <form th:action="${user.id != null ? '/admin/users/' + user.id : '/admin/users'}" 
+              th:method="${user.id != null ? 'POST' : 'POST'}" method="post">
+            <div class="form-row">
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" name="fullName" required th:value="${user.fullName}">
+            </div>
+            
+            <div class="form-row">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required th:value="${user.username}">
+            </div>
+            
+            <div class="form-row">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required th:value="${user.email}">
+            </div>
+            
+            <div class="form-row">
+                <label for="phone">Phone</label>
+                <input type="tel" id="phone" name="phone" th:value="${user.phone}">
+            </div>
+            
+            <div class="form-row">
+                <label for="companyName">Company Name</label>
+                <input type="text" id="companyName" name="companyName" th:value="${user.companyName}">
+            </div>
+            
+            <div class="form-row">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" th:if="${user.id == null}" required>
+                <input type="password" id="password" name="password" th:if="${user.id != null}" placeholder="Leave blank to keep current password">
+            </div>
+            
+            <div class="form-row">
+                <label for="status">Status</label>
+                <select id="status" name="status" required>
+                    <option value="ACTIVE" th:selected="${user.status == 'ACTIVE'}">Active</option>
+                    <option value="INACTIVE" th:selected="${user.status == 'INACTIVE'}">Inactive</option>
+                    <option value="SUSPENDED" th:selected="${user.status == 'SUSPENDED'}">Suspended</option>
+                </select>
+            </div>
+            
+            <div class="form-row">
+                <label for="internalNotes">Internal Notes</label>
+                <textarea id="internalNotes" name="internalNotes" rows="3" th:text="${user.internalNotes}"></textarea>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn primary" th:text="${user.id != null ? 'Update User' : 'Create User'}">Create User</button>
+                <a th:href="@{/admin/users}" class="btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+    
+    <footer class="admin-footer-sticky">
+        © 2025 AdBridgeLanka · Admin
+    </footer>
+</section>
+</html>
+

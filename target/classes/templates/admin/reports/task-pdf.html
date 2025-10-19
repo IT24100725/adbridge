@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${reportType}">Task Progress Report</title>
+    <style>
+        @media print {
+            body { margin: 0; }
+            .no-print { display: none !important; }
+            .print-button { display: none !important; }
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .report-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+        }
+        
+        .report-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 20px;
+        }
+        
+        .report-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 0;
+        }
+        
+        .company-info {
+            margin-top: 10px;
+            color: #6c757d;
+        }
+        
+        .report-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .metric-card {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 10px 0;
+        }
+        
+        .metric-label {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .highlight {
+            background: #e8f5e8;
+            border-color: #28a745;
+        }
+        
+        .print-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 20px 0;
+        }
+        
+        .print-button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <div class="report-header">
+            <h1 class="report-title" th:text="${reportType}">Task Progress Report</h1>
+            <div class="company-info">
+                <strong>AdBridge Lanka</strong><br>
+                Digital Marketing Services<br>
+                Period: <span th:text="${period}">01/01/2025 - 31/01/2025</span>
+            </div>
+        </div>
+        
+        <div class="report-info">
+            <strong>Report Generated:</strong> <span th:text="${generatedTime}">27/09/2025 00:45</span>
+        </div>
+        
+        <div class="metrics-grid">
+            <div class="metric-card highlight">
+                <div class="metric-label">Total Tasks</div>
+                <div class="metric-value" th:text="${reportData['totalTasks']}">0</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Completed Tasks</div>
+                <div class="metric-value" th:text="${reportData['completedTasks']}">0</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">In Progress</div>
+                <div class="metric-value" th:text="${reportData['inProgressTasks']}">0</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Completion Rate</div>
+                <div class="metric-value" th:text="${#numbers.formatDecimal(reportData['completionRate'], 1, 1)} + '%'">75.0%</div>
+            </div>
+        </div>
+        
+        <div class="no-print">
+            <button class="print-button" onclick="window.print()">🖨️ Print/Save as PDF</button>
+            <p><em>Use your browser's print function to save as PDF</em></p>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+
+

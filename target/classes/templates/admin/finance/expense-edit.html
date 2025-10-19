@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head">
+        <h1 class="page-title">Edit Expense</h1>
+        <a class="btn" th:href="@{/admin/finance}">Back</a>
+    </div>
+
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <div class="form-container-v2">
+        <h2 class="form-v2-header">Edit Expense</h2>
+        <form th:action="@{'/admin/finance/expenses/' + ${expense.id} + '/edit'}" 
+              th:object="${expense}" method="post" class="form-v2">
+            <div class="form-v2-group full-width">
+                <input type="text" th:field="*{title}" class="form-v2-input" placeholder=" " required>
+                <label class="form-v2-label">Title *</label>
+            </div>
+            <div class="form-v2-group full-width">
+                <textarea th:field="*{notes}" class="form-v2-input" placeholder=" " rows="3"></textarea>
+                <label class="form-v2-label">Notes</label>
+            </div>
+            <div class="form-v2-group">
+                <select th:field="*{category}" class="form-v2-input" required>
+                    <option value="" disabled selected hidden>Select Category</option>
+                    <option th:each="cat : ${categoryOptions}" 
+                            th:value="${cat}" 
+                            th:text="${cat}"></option>
+                </select>
+                <label class="form-v2-label">Category *</label>
+            </div>
+            <div class="form-v2-group">
+                <input type="number" th:field="*{amount}" min="0" step="1" class="form-v2-input" placeholder=" " required>
+                <label class="form-v2-label">Amount (LKR) *</label>
+            </div>
+            <div class="form-v2-group">
+                <select th:field="*{currency}" class="form-v2-input">
+                    <option value="LKR">LKR</option>
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                </select>
+                <label class="form-v2-label">Currency</label>
+            </div>
+            <div class="form-v2-group">
+                <input type="date" th:field="*{expenseDate}" class="form-v2-input" placeholder=" " required>
+                <label class="form-v2-label">Expense Date *</label>
+            </div>
+            <div class="form-v2-actions">
+                <button type="submit" class="btn-v2 primary">Update Expense</button>
+                <a class="btn-v2" th:href="@{/admin/finance}">Cancel</a>
+            </div>
+        </form>
+    </div>
+    
+    <footer class="admin-footer-sticky">
+        © 2025 AdBridgeLanka · Admin
+    </footer>
+</section>
+</html>
+
+

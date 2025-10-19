@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/admin-layout :: adminLayout(~{::section})}">
+<section>
+    <div class="section-head" style="display:flex;justify-content:space-between;gap:1rem;align-items:center;">
+        <h1 class="page-title" th:text="${pageHeading}">TASKS</h1>
+    </div>
+
+    <div th:if="${flashMsg}" class="alert success" th:text="${flashMsg}"></div>
+    <div th:if="${errorMsg}" class="alert danger" th:text="${errorMsg}"></div>
+
+    <div class="card">
+        <!-- Modern Search Bar -->
+        <div class="modern-search-bar">
+            <form th:action="@{/admin/tasks}" method="get" class="search-form">
+                <div class="search-input-container">
+                    <input type="text" 
+                           name="search" 
+                           placeholder="Search tasks..." 
+                           th:value="${search}"
+                           class="pill-search-input"
+                           id="searchInput">
+                    <button type="button" class="search-clear-btn" onclick="clearSearch()" th:if="${search != null and !search.trim().isEmpty()}">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                
+                <div class="sort-dropdown-container">
+                    <select name="status" class="sort-dropdown" onchange="this.form.submit()">
+                        <option value="">All Status</option>
+                        <option value="PENDING" th:selected="${status == 'PENDING'}">PENDING</option>
+                        <option value="IN_PROGRESS" th:selected="${status == 'IN_PROGRESS'}">IN_PROGRESS</option>
+                        <option value="COMPLETED" th:selected="${status == 'COMPLETED'}">COMPLETED</option>
+                        <option value="CANCELLED" th:selected="${status == 'CANCELLED'}">CANCELLED</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="search-submit-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                </button>
+            </form>
+        </div>
+        
+        <table class="table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Assigned To</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Due Date</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="task : ${tasks}">
+                <td th:text="${task.id}">1</td>
+                <td>
+                    <div th:text="${task.title}">Task Title</div>
+                    <div class="muted" th:text="${task.description}" style="font-size:0.9em;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+                </td>
+                <td th:text="${task.assignedTo}">John Doe</td>
+                <td>
+                    <span th:text="${task.priority}" 
+                          th:class="'badge ' + (${task.priority} == 'HIGH' ? 'red' : (${task.priority} == 'MEDIUM' ? 'yellow' : 'green'))">LOW</span>
+                </td>
+                <td>
+                    <span th:text="${task.status}" 
+                          th:class="'badge ' + (${task.status} == 'COMPLETED' ? 'green' : (${task.status} == 'IN_PROGRESS' ? 'blue' : 'gray'))">PENDING</span>
+                </td>
+                <td th:text="${task.dueDate}">2025-01-15</td>
+                <td th:text="${task.createdAt}">2025-01-01</td>
+                <td>
+                    <a th:href="@{'/admin/tasks/' + ${task.id}}" class="btn xs">View</a>
+                    <span th:if="${adminRole != null and (adminRole.name() == 'ADMIN' or adminRole.name() == 'MARKETING' or adminRole.name() == 'SUPER_ADMIN')}">
+                        <a th:href="@{'/admin/tasks/' + ${task.id} + '/edit'}" class="btn xs">Edit</a>
+                        <form th:action="@{'/admin/tasks/' + ${task.id} + '/delete'}" method="post"
+                              style="display:inline" onsubmit="return confirm('Delete this task?')">
+                            <button type="submit" class="btn xs danger">Delete</button>
+                        </form>
+                    </span>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(tasks)}">
+                <td colspan="8" class="muted center">NO TASKS YET.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <footer class="admin-footer-sticky">
+        © 2025 AdBridgeLanka · Admin
+    </footer>
+    
+    <!-- JavaScript for Search Functionality -->
+    <script>
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.querySelector('.search-form').submit();
+        }
+    </script>
+</section>
+</html>
+

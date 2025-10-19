@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title}">Invoice - AdBridgeLanka</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at 20% 40%, rgba(25,44,66,.28), transparent 65%), linear-gradient(115deg, #0c1013, #0b0e10 60%, #0b0d0f);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .invoice-container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 40px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .invoice-title {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #2c3e50;
+            letter-spacing: -1px;
+        }
+        
+        .company-info {
+            text-align: right;
+        }
+        
+        .company-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .company-tagline {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 15px;
+        }
+        
+        .company-details {
+            font-size: 0.85rem;
+            color: #6c757d;
+            line-height: 1.4;
+        }
+        
+        .invoice-details {
+            padding: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .invoice-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            min-width: 250px;
+        }
+        
+        .invoice-info h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .info-label {
+            font-weight: 500;
+            color: #6c757d;
+        }
+        
+        .info-value {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .bill-to-section {
+            padding: 0 40px 40px;
+        }
+        
+        .section-header {
+            background: #495057;
+            color: white;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-radius: 4px;
+        }
+        
+        .bill-to-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+        
+        .bill-to-column h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        
+        .bill-to-column p {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+        
+        .service-table-section {
+            padding: 0 40px 40px;
+        }
+        
+        .service-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .service-table th {
+            background: #495057;
+            color: white;
+            padding: 15px 20px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .service-table td {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 0.9rem;
+        }
+        
+        .service-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .service-table tr:nth-child(odd) {
+            background: white;
+        }
+        
+        .service-details {
+            vertical-align: top;
+            padding: 20px;
+        }
+        
+        .service-name {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .service-info {
+            font-size: 0.9rem;
+            color: #6c757d;
+            line-height: 1.6;
+        }
+        
+        .service-info div {
+            margin-bottom: 5px;
+        }
+        
+        .service-info strong {
+            color: #495057;
+            font-weight: 600;
+        }
+        
+        .amount {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #2c3e50;
+            text-align: right;
+            vertical-align: top;
+            padding: 20px;
+        }
+        
+        
+        .pricing-summary {
+            padding: 0 40px 40px;
+            text-align: right;
+        }
+        
+        .pricing-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .pricing-label {
+            font-weight: 500;
+            color: #6c757d;
+        }
+        
+        .pricing-value {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .pricing-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 0;
+            border-top: 2px solid #2c3e50;
+            margin-top: 20px;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        
+        .total-label {
+            color: #2c3e50;
+        }
+        
+        .total-value {
+            color: #2c3e50;
+        }
+        
+        .payment-info {
+            padding: 0 40px 40px;
+        }
+        
+        .payment-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 20px;
+        }
+        
+        .payment-column h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        
+        .payment-column p {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+        
+        .payment-instruction {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: #495057;
+        }
+        
+        .notes-section {
+            padding: 0 40px 40px;
+        }
+        
+        .notes-content {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #6c757d;
+        }
+        
+        .notes-content ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .notes-content li {
+            margin-bottom: 8px;
+        }
+        
+        .invoice-footer {
+            text-align: center;
+            padding: 30px 40px;
+            background: #f8f9fa;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .print-button {
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 20px auto;
+            display: block;
+            font-size: 0.9rem;
+        }
+        
+        .print-button:hover {
+            background: #34495e;
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            
+            .invoice-container {
+                margin: 0;
+                box-shadow: none;
+                border-radius: 0;
+            }
+            
+            .print-button {
+                display: none;
+            }
+        }
+        
+        /* Hide navbar and footer when printing */
+        @media print {
+            .main-nav,
+            .site-footer {
+                display: none !important;
+            }
+        }
+        
+        /* NAVBAR CSS - Complete from landing.css */
+        .main-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(180deg, #141a22, #0b0e11);
+            border-bottom: 1px solid #121619;
+            box-shadow: 0 4px 14px -10px rgba(0,0,0,.8);
+            z-index: 200;
+        }
+        
+        .nav-inner {
+            width: 100%;
+            max-width: 1520px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.9rem;
+        }
+        
+        .logo {
+            font-weight: 600;
+            letter-spacing: .14em;
+            font-size: 1.05rem;
+            color: #e6c567;
+            text-transform: capitalize;
+            text-decoration: none;
+        }
+        
+        .logo span {
+            color: #fff;
+            font-weight: 700;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2.35rem;
+        }
+        
+        .nav-links a {
+            font-size: .56rem;
+            letter-spacing: .32em;
+            text-transform: uppercase;
+            color: #7d8587;
+            position: relative;
+            padding: .35rem 0 .4rem;
+            font-weight: 500;
+            transition: color .4s;
+            text-decoration: none;
+        }
+        
+        .nav-links a:after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 1px;
+            width: 0;
+            background: linear-gradient(90deg, #e6c567, transparent);
+            opacity: .55;
+            transition: width .5s;
+            box-shadow: 0 0 10px rgba(230, 197, 103, 0.3);
+        }
+        
+        .nav-links a:hover {
+            color: #fff;
+        }
+        
+        .nav-links a:hover:after {
+            width: 100%;
+        }
+        
+        .book-btn, .payment-btn {
+            background: #e6c567;
+            color: #0c1013 !important;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        .book-btn:hover, .payment-btn:hover {
+            background: #d4b85a;
+        }
+        
+        /* NAV AUTH CSS */
+        .nav-auth {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-name {
+            font-size: 0.7rem;
+            color: #7d8587;
+            font-weight: 500;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 0.8rem;
+            font-size: 0.55rem;
+            letter-spacing: 0.34em;
+            font-weight: 600;
+            text-transform: uppercase;
+            border-radius: 6px;
+            border: 1px solid #21272d;
+            background: #121518;
+            color: #7d8587;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background: #21272d;
+            color: #e5e9ea;
+            transform: translateY(-1px);
+        }
+        
+        .btn.small {
+            padding: 0.5rem 0.8rem;
+            font-size: 0.55rem;
+        }
+        
+        .login-btn {
+            background: transparent;
+            border: 1px solid #21272d;
+            color: #7d8587;
+        }
+        
+        .login-btn:hover {
+            background: #21272d;
+            color: #e5e9ea;
+        }
+        
+        .logout-btn {
+            background: transparent;
+            border: 1px solid #21272d;
+            color: #7d8587;
+            font-size: 0.55rem;
+            padding: 0.5rem 0.8rem;
+            margin-left: 0;
+        }
+        
+        .logout-btn:hover {
+            background: #21272d;
+            color: #e5e9ea;
+            transform: translateY(-1px);
+        }
+        
+        /* FOOTER CSS - Complete from landing.css */
+        .site-footer {
+            padding: 2.9rem 2.2rem;
+            font-size: .56rem;
+            letter-spacing: .30em;
+            text-transform: uppercase;
+            text-align: center;
+            color: #5d656a;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: transparent;
+            margin-top: auto;
+        }
+        
+        /* MAIN WRAPPER */
+        .main-wrapper {
+            flex: 1 0 auto;
+            padding-top: 70px;
+        }
+        
+    </style>
+</head>
+<body>
+    <header class="main-nav">
+        <div class="nav-inner">
+            <a class="logo" th:href="@{/}">Ad<span>BridgeLanka</span></a>
+            <nav class="nav-links">
+                <a th:href="@{/#hero}">Home</a>
+                <a th:href="@{/services}">Services</a>
+                <a th:if="${showBookInNav} != true" th:href="@{/#process}">Process</a>
+                <a th:if="${showBookInNav} != true" th:href="@{/#team}">Team</a>
+                <a th:if="${showBookInNav} != true" th:href="@{/#clients}">Clients</a>
+                <a th:href="@{/contact}">Contact</a>
+                <a th:if="${showBookInNav} == true" th:href="@{/my-bookings}">
+                    <span th:if="${session.user != null}">My Bookings</span>
+                    <span th:if="${session.user == null}">Book</span>
+                </a>
+                <a th:if="${showPaymentInNav} == true" th:href="@{/payment}">
+                    <span th:if="${session.user != null}">My Payments</span>
+                    <span th:if="${session.user == null}">Payment</span>
+                </a>
+                <a th:if="${showBookInNav == true and showPaymentInNav != true and session.user == null}" th:href="@{/book}" onclick="showPaymentAlert(event)">
+                    Payment
+                </a>
+                <a th:if="${showBookInNav == true and showPaymentInNav != true and session.user != null}" th:href="@{/payment}">
+                    My Payments
+                </a>
+                <!-- User Dashboard Navigation - only show when user is logged in and on user pages -->
+                <a th:if="${session.user != null and (showBookInNav == true or showPaymentInNav == true)}" th:href="@{/notifications}">Notifications</a>
+            </nav>
+            <div class="nav-auth">
+                <a th:if="${session.user == null}"
+                   th:href="@{/login}"
+                   onclick="this.href = this.href + '?next=' + encodeURIComponent(window.location.pathname + window.location.search);"
+                   class="btn small login-btn">Login</a>
+                <div th:if="${session.user != null}" class="user-menu">
+                    <span class="user-name" th:text="${session.user.fullName}">User</span>
+                    <form th:action="@{/logout}" method="post" style="display:inline;">
+                        <button type="submit" class="btn small logout-btn">Logout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-wrapper">
+        <div class="invoice-container">
+        <!-- Header -->
+        <div class="invoice-header">
+            <h1 class="invoice-title">INVOICE</h1>
+            <div class="company-info">
+                <div class="company-name">AdBridgeLanka</div>
+                <div class="company-tagline">Your Bridge to Advertising Excellence</div>
+                <div class="company-details">
+                    123 Business Street<br>
+                    Colombo, Sri Lanka<br>
+                    (011) 123-4567<br>
+                    info@adbridgelanka.com
+                </div>
+            </div>
+        </div>
+
+        <!-- Invoice Details -->
+        <div class="invoice-details">
+            <div class="invoice-info">
+                <h3>Invoice Details</h3>
+                <div class="info-row">
+                    <span class="info-label">Invoice Number:</span>
+                    <span class="info-value" th:text="${booking.bookingId}">#INV2024-001</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Invoice Date:</span>
+                    <span class="info-value" th:text="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">2024-01-15</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Due Date:</span>
+                    <span class="info-value" th:text="${#temporals.format(#temporals.createNow().plusDays(30), 'yyyy-MM-dd')}">2024-02-14</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bill To Section -->
+        <div class="bill-to-section">
+            <div class="section-header">Bill To</div>
+            <div class="bill-to-content">
+                <div class="bill-to-column">
+                    <h4>Client Name:</h4>
+                    <p th:text="${booking.fullName}">John Client</p>
+                    <h4>Company Name:</h4>
+                    <p th:text="${booking.companyName}">Client Company Ltd</p>
+                </div>
+                <div class="bill-to-column">
+                    <h4>Client Phone:</h4>
+                    <p th:text="${booking.contactNumber}">(555) 123-4567</p>
+                    <h4>Client Email:</h4>
+                    <p th:text="${booking.email}">johnclient@email.com</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Service Table -->
+        <div class="service-table-section">
+            <div class="section-header">Description of Service</div>
+            <table class="service-table">
+                <thead>
+                    <tr>
+                        <th>Service Description</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- TV Advertisement -->
+                    <tr th:if="${booking.serviceType.name() == 'TV_ADVERTISEMENT'}">
+                        <td class="service-details">
+                            <div class="service-name" th:text="${booking.serviceType}">TV Advertisement</div>
+                            <div class="service-info">
+                                <div th:if="${booking.optionOne != null and !booking.optionOne.isEmpty()}">
+                                    <strong>TV Channels:</strong> <span th:text="${booking.optionOne}">Sirasa TV, Hiru TV</span>
+                                </div>
+                                <div th:if="${booking.optionFour != null and !booking.optionFour.isEmpty()}">
+                                    <strong>Time Slots:</strong> <span th:text="${booking.optionFour}">Prime Time</span>
+                                </div>
+                                <div th:if="${booking.optionTwo != null and !booking.optionTwo.isEmpty()}">
+                                    <strong>Duration:</strong> <span th:text="${booking.optionTwo}">30 seconds</span>
+                                </div>
+                                <div th:if="${booking.optionThree != null and !booking.optionThree.isEmpty()}">
+                                    <strong>Days:</strong> <span th:text="${booking.optionThree}">7 days</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="amount" th:text="'Rs. ' + ${#numbers.formatInteger(booking.totalAmount, 0, 'COMMA')}">Rs. 50,000</td>
+                    </tr>
+
+                    <!-- Radio Promotion -->
+                    <tr th:if="${booking.serviceType.name() == 'RADIO_PROMOTION'}">
+                        <td class="service-details">
+                            <div class="service-name" th:text="${booking.serviceType}">Radio Promotion</div>
+                            <div class="service-info">
+                                <div th:if="${booking.optionOne != null and !booking.optionOne.isEmpty()}">
+                                    <strong>Radio Channels:</strong> <span th:text="${booking.optionOne}">Sirasa FM, Hiru FM</span>
+                                </div>
+                                <div th:if="${booking.optionFour != null and !booking.optionFour.isEmpty()}">
+                                    <strong>Time Slots:</strong> <span th:text="${booking.optionFour}">Morning Drive</span>
+                                </div>
+                                <div th:if="${booking.optionTwo != null and !booking.optionTwo.isEmpty()}">
+                                    <strong>Duration:</strong> <span th:text="${booking.optionTwo}">30 seconds</span>
+                                </div>
+                                <div th:if="${booking.optionThree != null and !booking.optionThree.isEmpty()}">
+                                    <strong>Days:</strong> <span th:text="${booking.optionThree}">7 days</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="amount" th:text="'Rs. ' + ${#numbers.formatInteger(booking.totalAmount, 0, 'COMMA')}">Rs. 35,000</td>
+                    </tr>
+
+                    <!-- Social Media Campaign -->
+                    <tr th:if="${booking.serviceType.name() == 'SOCIAL_MEDIA_CAMPAIGN'}">
+                        <td class="service-details">
+                            <div class="service-name" th:text="${booking.serviceType}">Social Media Campaign</div>
+                            <div class="service-info">
+                                <div th:if="${booking.optionOne != null and !booking.optionOne.isEmpty()}">
+                                    <strong>Platforms:</strong> <span th:text="${booking.optionOne}">Facebook, Instagram</span>
+                                </div>
+                                <div th:if="${booking.optionTwo != null and !booking.optionTwo.isEmpty()}">
+                                    <strong>Campaign Duration:</strong> <span th:text="${booking.optionTwo}">30 days</span>
+                                </div>
+                                <div th:if="${booking.optionThree != null and !booking.optionThree.isEmpty()}">
+                                    <strong>Content Type:</strong> <span th:text="${booking.optionThree}">Video Posts</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="amount" th:text="'Rs. ' + ${#numbers.formatInteger(booking.totalAmount, 0, 'COMMA')}">Rs. 45,000</td>
+                    </tr>
+
+                    <!-- Newspaper Ad -->
+                    <tr th:if="${booking.serviceType.name() == 'NEWSPAPER_AD'}">
+                        <td class="service-details">
+                            <div class="service-name" th:text="${booking.serviceType}">Newspaper Advertisement</div>
+                            <div class="service-info">
+                                <div th:if="${booking.optionOne != null and !booking.optionOne.isEmpty()}">
+                                    <strong>Newspaper Name:</strong> <span th:text="${booking.optionOne}">Daily News, Sunday Times</span>
+                                </div>
+                                <div th:if="${booking.optionTwo != null and !booking.optionTwo.isEmpty()}">
+                                    <strong>Ad Size:</strong> <span th:text="${booking.optionTwo}">Half Page</span>
+                                </div>
+                                <div th:if="${booking.optionThree != null and !booking.optionThree.isEmpty()}">
+                                    <strong>Colour Option:</strong> <span th:text="${booking.optionThree}">Full Color</span>
+                                </div>
+                                <div th:if="${booking.optionFour != null and !booking.optionFour.isEmpty()}">
+                                    <strong>Number of Days:</strong> <span th:text="${booking.optionFour}">3 days</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="amount" th:text="'Rs. ' + ${#numbers.formatInteger(booking.totalAmount, 0, 'COMMA')}">Rs. 40,000</td>
+                    </tr>
+
+                    <!-- Billboard Advertising -->
+                    <tr th:if="${booking.serviceType.name() == 'BILLBOARD_ADVERTISING'}">
+                        <td class="service-details">
+                            <div class="service-name" th:text="${booking.serviceType}">Billboard Advertising</div>
+                            <div class="service-info">
+                                <div th:if="${booking.optionOne != null and !booking.optionOne.isEmpty()}">
+                                    <strong>Locations:</strong> <span th:text="${booking.optionOne}">Colombo, Kandy</span>
+                                </div>
+                                <div th:if="${booking.optionTwo != null and !booking.optionTwo.isEmpty()}">
+                                    <strong>Billboard Size:</strong> <span th:text="${booking.optionTwo}">Large (48x12)</span>
+                                </div>
+                                <div th:if="${booking.optionThree != null and !booking.optionThree.isEmpty()}">
+                                    <strong>Display Duration:</strong> <span th:text="${booking.optionThree}">30 days</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="amount" th:text="'Rs. ' + ${#numbers.formatInteger(booking.totalAmount, 0, 'COMMA')}">Rs. 75,000</td>
+                    </tr>
+
+                    <!-- Digital Banner -->
+                    <tr th:if="${booking.serviceType.name() == 'DIGITAL_BANNER'}">
+                        <td class="service-details">
+                            <div class="service-name" th:text="${booking.serviceType}">Digital Banner Advertisement</div>
+                            <div class="service-info">
+                                <div th:if="${booking.optionOne != null and !booking.optionOne.isEmpty()}">
+                                    <strong>Website Type:</strong> <span th:text="${booking.optionOne}">E-commerce, News Portal</span>
+                                </div>
+                                <div th:if="${booking.optionTwo != null and !booking.optionTwo.isEmpty()}">
+                                    <strong>Banner Size:</strong> <span th:text="${booking.optionTwo}">728x90 (Leaderboard)</span>
+                                </div>
+                                <div th:if="${booking.optionFour != null and !booking.optionFour.isEmpty()}">
+                                    <strong>Tracking Required:</strong> <span th:text="${booking.optionFour}">Yes</span>
+                                </div>
+                                <div th:if="${booking.optionFive != null and !booking.optionFive.isEmpty()}">
+                                    <strong>Duration:</strong> <span th:text="${booking.optionFive}">14 days</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="amount" th:text="'Rs. ' + ${#numbers.formatInteger(booking.totalAmount, 0, 'COMMA')}">Rs. 25,000</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pricing Summary -->
+        <div class="pricing-summary">
+            <div class="pricing-total">
+                <span class="total-label">TOTAL:</span>
+                <span class="total-value" th:text="'Rs. ' + ${#numbers.formatInteger(booking.totalAmount, 0, 'COMMA')}">Rs. 50,000</span>
+            </div>
+        </div>
+
+        <!-- Payment Information -->
+        <div class="payment-info">
+            <div class="section-header">Payment Information</div>
+            
+            <!-- Card Payment -->
+            <div th:if="${paymentMethod == 'card' or paymentMethod == 'CARD'}">
+                <div class="payment-content">
+                    <div class="payment-column">
+                        <h4>Payment Method:</h4>
+                        <p>Credit/Debit Card</p>
+                        <h4>Payment Status:</h4>
+                        <p>Paid ✓</p>
+                    </div>
+                    <div class="payment-column">
+                        <h4>Transaction:</h4>
+                        <p>Completed</p>
+                        <h4>Gateway:</h4>
+                        <p>Secure Payment Gateway</p>
+                    </div>
+                </div>
+                <div class="payment-instruction">
+                    Your payment has been successfully processed via secure card payment gateway. Thank you for your business!
+                </div>
+            </div>
+            
+            <!-- Bank Transfer Payment -->
+            <div th:if="${paymentMethod == 'bank' or paymentMethod == 'BANK' or paymentMethod == 'bank_transfer'}">
+                <div class="payment-content">
+                    <div class="payment-column">
+                        <h4>Payment Method:</h4>
+                        <p>Bank Transfer</p>
+                        <h4>Payment Status:</h4>
+                        <p>Verified ✓</p>
+                    </div>
+                    <div class="payment-column">
+                        <h4>Bank Details Used:</h4>
+                        <p>Commercial Bank</p>
+                        <h4>Account:</h4>
+                        <p>AdBridgeLanka - 1234567890</p>
+                    </div>
+                </div>
+                <div class="payment-instruction">
+                    Your payment has been received and verified. Thank you for your business!
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="notes-section">
+            <div class="section-header">Notes</div>
+            <div class="notes-content">
+                <ul>
+                    <li>Payment is due by the due date mentioned above.</li>
+                    <li>Late payments may incur additional charges.</li>
+                    <li>If you have any questions or concerns regarding this invoice, please contact us at (011) 123-4567 or info@adbridgelanka.com.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Print Button -->
+        <button class="print-button" onclick="window.print()">Print Invoice</button>
+
+        <!-- Footer -->
+        <div class="invoice-footer">
+            Thank you for choosing AdBridgeLanka!
+        </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        © <span th:text="${#temporals.format(#temporals.createNow(),'yyyy')}"></span> AdBridgeLanka
+    </footer>
+</body>
+</html>
