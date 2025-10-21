@@ -303,17 +303,6 @@ public class AdminClientsController {
                     client.setCreatedFromContact(contact);
                     userRepository.save(client);
                     System.out.println("DEBUG: Saved client with contact relationship");
-                    
-                    // Create notification for the user who requested this client
-                    if (contact.getRequestedByUser() != null) {
-                        Notification notification = new Notification(
-                            contact.getRequestedByUser(),
-                            "New Client Request Processed",
-                            "Your new client request has been processed by our support team. The client account has been created and is pending approval.",
-                            Notification.NotificationType.SUCCESS
-                        );
-                        notificationRepository.save(notification);
-                    }
                 }
             }
             
@@ -555,43 +544,6 @@ public class AdminClientsController {
             Contact contact = contactOpt.get();
             contact.setIsReplied(true);
             contactRepository.save(contact);
-            
-            // Create notification for the user who made the request
-            if (contact.getRequestedByUser() != null) {
-                String notificationTitle;
-                String notificationMessage;
-                
-                switch (contact.getRequestType()) {
-                    case "CREATE_NEW_CLIENT":
-                        notificationTitle = "New Client Request Processed";
-                        notificationMessage = "Your new client request has been processed by our support team. We'll contact you with further details soon.";
-                        break;
-                    case "CANCEL_BOOKING":
-                        notificationTitle = "Booking Cancellation Processed";
-                        notificationMessage = "Your booking cancellation request has been processed by our support team. We'll contact you with confirmation details soon.";
-                        break;
-                    case "REJECTED_BOOKING_REQUEST":
-                        notificationTitle = "Booking Re-approval Processed";
-                        notificationMessage = "Your booking re-approval request has been processed by our support team. We'll contact you with the decision soon.";
-                        break;
-                    case "GENERAL_INQUIRY":
-                        notificationTitle = "General Inquiry Processed";
-                        notificationMessage = "Your general inquiry has been processed by our support team. We'll contact you with a response soon.";
-                        break;
-                    default:
-                        notificationTitle = "Contact Request Processed";
-                        notificationMessage = "Your contact request has been processed by our support team. We'll contact you with a response soon.";
-                        break;
-                }
-                
-                Notification notification = new Notification(
-                    contact.getRequestedByUser(),
-                    notificationTitle,
-                    notificationMessage,
-                    Notification.NotificationType.SUCCESS
-                );
-                notificationRepository.save(notification);
-            }
             
             ra.addFlashAttribute("success", "Contact marked as replied");
             return "redirect:/admin/clients";
