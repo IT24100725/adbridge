@@ -106,11 +106,37 @@ public class ContactController {
 
             // Check if user is logged in and send notification
             if (user != null) {
-                // Create notification for the user
+                // Create specific notification based on request type
+                String notificationTitle;
+                String notificationMessage;
+                
+                switch (requestType) {
+                    case "CREATE_NEW_CLIENT":
+                        notificationTitle = "Create New Client Request";
+                        notificationMessage = "Your request to create a new client has been submitted successfully. Our team will review the details and process your request soon.";
+                        break;
+                    case "CANCEL_BOOKING":
+                        notificationTitle = "Cancel Booking Request";
+                        notificationMessage = "Your booking cancellation request has been submitted successfully. Our support team will process your cancellation request soon.";
+                        break;
+                    case "REJECTED_BOOKING_REQUEST":
+                        notificationTitle = "Rejected Booking Request";
+                        notificationMessage = "Your request for re-approval of the rejected booking has been submitted successfully. Our team will review your request soon.";
+                        break;
+                    case "GENERAL_INQUIRY":
+                        notificationTitle = "General Inquiry";
+                        notificationMessage = "Your inquiry has been submitted successfully. Our support team will get back to you soon.";
+                        break;
+                    default:
+                        notificationTitle = "Contact Message Sent";
+                        notificationMessage = "Your contact message has been sent successfully. Our support team will review it and get back to you soon.";
+                        break;
+                }
+                
                 Notification notification = new Notification(
                     user,
-                    "Contact Message Sent",
-                    "Your contact message has been sent successfully. Our support team will review it and get back to you soon.",
+                    notificationTitle,
+                    notificationMessage,
                     Notification.NotificationType.INFO
                 );
                 notificationRepository.save(notification);
