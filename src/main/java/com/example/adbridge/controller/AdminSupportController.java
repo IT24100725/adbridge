@@ -12,6 +12,10 @@ import com.example.adbridge.repo.ExpressBookingActionRepository;
 import com.example.adbridge.repo.CancellationActionRepository;
 import com.example.adbridge.service.NotificationService;
 import com.example.adbridge.repo.SupportCommentRepository;
+import com.example.adbridge.repo.UserRepository;
+import com.example.adbridge.repo.NotificationRepository;
+import com.example.adbridge.model.User;
+import com.example.adbridge.model.Notification;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -36,14 +40,18 @@ public class AdminSupportController {
     private final NotificationService notificationService;
     private final ExpressBookingActionRepository expressBookingActionRepository;
     private final CancellationActionRepository cancellationActionRepository;
+    private final UserRepository userRepository;
+    private final NotificationRepository notificationRepository;
 
-    public AdminSupportController(SupportRequestRepository supportRepository, SupportCommentRepository commentRepository, ContactRepository contactRepository, NotificationService notificationService, ExpressBookingActionRepository expressBookingActionRepository, CancellationActionRepository cancellationActionRepository) {
+    public AdminSupportController(SupportRequestRepository supportRepository, SupportCommentRepository commentRepository, ContactRepository contactRepository, NotificationService notificationService, ExpressBookingActionRepository expressBookingActionRepository, CancellationActionRepository cancellationActionRepository, UserRepository userRepository, NotificationRepository notificationRepository) {
         this.supportRepository = supportRepository;
         this.commentRepository = commentRepository;
         this.contactRepository = contactRepository;
         this.notificationService = notificationService;
         this.expressBookingActionRepository = expressBookingActionRepository;
         this.cancellationActionRepository = cancellationActionRepository;
+        this.userRepository = userRepository;
+        this.notificationRepository = notificationRepository;
     }
 
     @GetMapping
@@ -204,6 +212,48 @@ public class AdminSupportController {
         
         // notify client (placeholder)
         notificationService.sendEmail(ticket.getClientEmail(), "We received your request", "Hello " + ticket.getClientName() + ",\n\nYour support ticket has been created. We'll get back to you soon.\n\nThanks.");
+        
+        // Create in-app notification for the client if they have a user account
+        try {
+            List<User> users = userRepository.findByEmail(ticket.getClientEmail());
+            User clientUser = users.isEmpty() ? null : users.get(0);
+            if (clientUser != null) {
+                // Create notification based on the request type
+                String notificationTitle;
+                String notificationMessage;
+                
+                // Determine request type from ticket subject or message
+                String subject = ticket.getSubject() != null ? ticket.getSubject().toLowerCase() : "";
+                String message = ticket.getMessage() != null ? ticket.getMessage().toLowerCase() : "";
+                
+                if (subject.contains("client") || message.contains("create") || message.contains("client")) {
+                    notificationTitle = "Create New Client Request - Processing";
+                    notificationMessage = "Your client creation request is now being processed by our support team. We'll update you on the progress soon.";
+                } else if (subject.contains("cancel") || message.contains("cancel")) {
+                    notificationTitle = "Cancel Booking Request - Processing";
+                    notificationMessage = "Your booking cancellation request is now being processed by our support team. We'll update you on the progress soon.";
+                } else if (subject.contains("reject") || message.contains("reject") || subject.contains("re-approval")) {
+                    notificationTitle = "Rejected Booking Request - Processing";
+                    notificationMessage = "Your re-approval request is now being processed by our support team. We'll update you on the progress soon.";
+                } else {
+                    notificationTitle = "General Inquiry - Processing";
+                    notificationMessage = "Your inquiry is now being processed by our support team. We'll get back to you soon.";
+                }
+                
+                Notification notification = new Notification(
+                    clientUser,
+                    notificationTitle,
+                    notificationMessage,
+                    Notification.NotificationType.INFO
+                );
+                notificationRepository.save(notification);
+                
+                System.out.println("Created support request notification for user: " + clientUser.getEmail());
+            }
+        } catch (Exception e) {
+            System.out.println("Could not create support request notification: " + e.getMessage());
+        }
+        
         ra.addFlashAttribute("success", "Support request created");
         return "redirect:/admin/support";
     }
@@ -263,6 +313,28 @@ public class AdminSupportController {
         // notify client on status change
         if (updated.getStatus() != null && s.getClientEmail() != null) {
             notificationService.sendEmail(s.getClientEmail(), "Ticket status updated", "Your ticket status is now: " + s.getStatus());
+            
+            // Create in-app notification for status change
+            try {
+                List<User> users = userRepository.findByEmail(s.getClientEmail());
+                User clientUser = users.isEmpty() ? null : users.get(0);
+                if (clientUser != null) {
+                    String notificationTitle = "Support Request Status Update";
+                    String notificationMessage = "Your support request status has been updated to: " + s.getStatus();
+                    
+                    Notification notification = new Notification(
+                        clientUser,
+                        notificationTitle,
+                        notificationMessage,
+                        Notification.NotificationType.INFO
+                    );
+                    notificationRepository.save(notification);
+                    
+                    System.out.println("Created status update notification for user: " + clientUser.getEmail());
+                }
+            } catch (Exception e) {
+                System.out.println("Could not create status update notification: " + e.getMessage());
+            }
         }
         ra.addFlashAttribute("success", "Support request updated");
         return "redirect:/admin/support";
@@ -287,8 +359,56 @@ public class AdminSupportController {
         c.setAuthor(author == null || author.isBlank() ? "support" : author.trim());
         c.setContent(content.trim());
         commentRepository.save(c);
-        // notify client on new comment (simple)
-        t.ifPresent(ticket -> notificationService.sendEmail(ticket.getClientEmail(), "Update on your ticket", c.getContent()));
+        
+        // Create notification for the client if they have a user account
+        t.ifPresent(ticket -> {
+            // Send email notification
+            notificationService.sendEmail(ticket.getClientEmail(), "Update on your ticket", c.getContent());
+            
+            // Try to find the user by email and create in-app notification
+            try {
+                List<User> users = userRepository.findByEmail(ticket.getClientEmail());
+                User clientUser = users.isEmpty() ? null : users.get(0);
+                if (clientUser != null) {
+                    // Create notification based on the original request type
+                    String notificationTitle;
+                    String notificationMessage;
+                    
+                    // Determine request type from ticket subject or message
+                    String subject = ticket.getSubject() != null ? ticket.getSubject().toLowerCase() : "";
+                    String message = ticket.getMessage() != null ? ticket.getMessage().toLowerCase() : "";
+                    
+                    if (subject.contains("client") || message.contains("create") || message.contains("client")) {
+                        notificationTitle = "Create New Client Request - Reply";
+                        notificationMessage = "Our support team has replied to your client creation request: " + c.getContent();
+                    } else if (subject.contains("cancel") || message.contains("cancel")) {
+                        notificationTitle = "Cancel Booking Request - Reply";
+                        notificationMessage = "Our support team has replied to your booking cancellation request: " + c.getContent();
+                    } else if (subject.contains("reject") || message.contains("reject") || subject.contains("re-approval")) {
+                        notificationTitle = "Rejected Booking Request - Reply";
+                        notificationMessage = "Our support team has replied to your re-approval request: " + c.getContent();
+                    } else {
+                        notificationTitle = "General Inquiry - Reply";
+                        notificationMessage = "Our support team has replied to your inquiry: " + c.getContent();
+                    }
+                    
+                    Notification notification = new Notification(
+                        clientUser,
+                        notificationTitle,
+                        notificationMessage,
+                        Notification.NotificationType.INFO
+                    );
+                    notificationRepository.save(notification);
+                    
+                    System.out.println("Created notification for user: " + clientUser.getEmail());
+                } else {
+                    System.out.println("No user found with email: " + ticket.getClientEmail());
+                }
+            } catch (Exception e) {
+                System.out.println("Could not create in-app notification: " + e.getMessage());
+            }
+        });
+        
         ra.addFlashAttribute("success", "Comment added");
         return "redirect:/admin/support/" + id + "/edit";
     }
@@ -357,6 +477,29 @@ public class AdminSupportController {
             SupportRequest ticket = ticketOpt.get();
             ticket.setStatus(SupportRequest.Status.RESOLVED);
             supportRepository.save(ticket);
+            
+            // Create notification for ticket resolution
+            try {
+                List<User> users = userRepository.findByEmail(ticket.getClientEmail());
+                User clientUser = users.isEmpty() ? null : users.get(0);
+                if (clientUser != null) {
+                    String notificationTitle = "Support Request Resolved";
+                    String notificationMessage = "Your support request has been resolved. Thank you for contacting us!";
+                    
+                    Notification notification = new Notification(
+                        clientUser,
+                        notificationTitle,
+                        notificationMessage,
+                        Notification.NotificationType.SUCCESS
+                    );
+                    notificationRepository.save(notification);
+                    
+                    System.out.println("Created resolution notification for user: " + clientUser.getEmail());
+                }
+            } catch (Exception e) {
+                System.out.println("Could not create resolution notification: " + e.getMessage());
+            }
+            
             ra.addFlashAttribute("success", "Ticket marked as resolved");
         } else {
             ra.addFlashAttribute("error", "Ticket not found");

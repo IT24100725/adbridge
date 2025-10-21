@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Express Bookings Report</title>
+    <style>
+        @media print {
+            body { margin: 0; }
+            .no-print { display: none !important; }
+            .print-button { display: none !important; }
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 15px;
+            color: #333;
+            line-height: 1.4;
+            font-size: 12px;
+        }
+        
+        .report-container {
+            width: 100%;
+            background: white;
+            padding: 0;
+        }
+        
+        .report-header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #2c3e50;
+            padding-bottom: 15px;
+        }
+        
+        .report-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 0;
+        }
+        
+        .company-info {
+            margin-top: 10px;
+            color: #6c757d;
+        }
+        
+        .report-info {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 3px;
+            margin-bottom: 15px;
+            font-size: 11px;
+        }
+        
+        .summary-grid {
+            display: table;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        .summary-card {
+            display: table-cell;
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            text-align: center;
+            width: 33.33%;
+            vertical-align: top;
+        }
+        
+        .summary-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 5px 0;
+        }
+        
+        .summary-label {
+            color: #6c757d;
+            font-size: 10px;
+        }
+        
+        .highlight {
+            background: #e8f5e8;
+            border-color: #28a745;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 10px;
+            page-break-inside: avoid;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 6px 4px;
+            text-align: left;
+            vertical-align: top;
+        }
+        
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 9px;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        /* Page break handling */
+        .page-break {
+            page-break-before: always;
+        }
+        
+        /* Ensure table fits on page */
+        @media print {
+            table {
+                font-size: 9px;
+            }
+            th, td {
+                padding: 4px 2px;
+            }
+        }
+        
+        .action-badge {
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-size: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .action-created {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .action-updated {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+        
+        .action-cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .print-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 20px 0;
+        }
+        
+        .print-button:hover {
+            background: #0056b3;
+        }
+        
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <div class="report-header">
+            <h1 class="report-title">Express Bookings Report</h1>
+            <div class="company-info">
+                <strong>AdBridge Lanka</strong><br>
+                Digital Marketing Services<br>
+                Generated: <span th:text="${generatedTime}">27/01/2025 10:00</span>
+            </div>
+        </div>
+        
+        <div class="report-info">
+            <strong>Report Period:</strong> All Express Booking Actions<br>
+            <strong>Total Actions:</strong> <span th:text="${#lists.size(actions)}">0</span> records
+        </div>
+        
+        <div class="summary-grid">
+            <div class="summary-card highlight">
+                <div class="summary-label">Total Actions</div>
+                <div class="summary-value" th:text="${#lists.size(actions)}">0</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">Created Actions</div>
+                <div class="summary-value" th:text="${#lists.size(actions.?[action == 'CREATED'])}">0</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">Updated Actions</div>
+                <div class="summary-value" th:text="${#lists.size(actions.?[action == 'UPDATED'])}">0</div>
+            </div>
+        </div>
+        
+        <h2>Express Booking Actions Details</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Booking ID</th>
+                    <th>Action</th>
+                    <th>Performed By</th>
+                    <th>Client Name</th>
+                    <th>Client Email</th>
+                    <th>Total Amount (LKR)</th>
+                    <th>Service Type</th>
+                    <th>Created At</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="action : ${actions}">
+                    <td th:text="${action.bookingId}">BK-001</td>
+                    <td>
+                        <span class="action-badge" 
+                              th:classappend="${action.action == 'CREATED'} ? 'action-created' : (${action.action == 'UPDATED'} ? 'action-updated' : 'action-cancelled')"
+                              th:text="${action.action}">CREATED</span>
+                    </td>
+                    <td th:text="${action.performedBy}">Admin User</td>
+                    <td th:text="${action.clientName}">Client Name</td>
+                    <td th:text="${action.clientEmail}">client@email.com</td>
+                    <td th:text="${#numbers.formatDecimal(action.totalAmount, 1, 2)}">0.00</td>
+                    <td th:text="${action.serviceType}">Service Type</td>
+                    <td th:text="${#temporals.format(action.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2025 10:00</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(actions)}">
+                    <td colspan="8" style="text-align: center; color: #666; padding: 20px;">
+                        No express booking actions found for this period.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="no-print">
+            <button class="print-button" onclick="window.print()">🖨️ Print/Save as PDF</button>
+            <p><em>Use your browser's print function to save as PDF</em></p>
+        </div>
+        
+        <div class="footer">
+            <p>Generated by AdBridgeLanka Support System</p>
+            <p>This report contains all express booking actions performed by support staff</p>
+        </div>
+    </div>
+</body>
+</html>
