@@ -40,27 +40,27 @@ public class NotificationController {
         
         // Group notifications by request type based on title content
         List<Notification> createClientNotifications = notifications.stream()
-                .filter(n -> n.getTitle().toLowerCase().contains("client") || 
-                           n.getTitle().toLowerCase().contains("create"))
+                .filter(n -> n.getTitle().toLowerCase().contains("new client") || 
+                           n.getTitle().toLowerCase().contains("client request") ||
+                           n.getTitle().toLowerCase().contains("client approved"))
                 .collect(Collectors.toList());
         
         List<Notification> cancelBookingNotifications = notifications.stream()
-                .filter(n -> n.getTitle().toLowerCase().contains("cancel") || 
-                           n.getTitle().toLowerCase().contains("cancelled"))
+                .filter(n -> n.getTitle().toLowerCase().contains("cancellation") || 
+                           n.getTitle().toLowerCase().contains("cancel booking") ||
+                           n.getTitle().toLowerCase().contains("booking cancel"))
                 .collect(Collectors.toList());
         
         List<Notification> rejectedBookingNotifications = notifications.stream()
-                .filter(n -> n.getTitle().toLowerCase().contains("reject") || 
-                           n.getTitle().toLowerCase().contains("rejected"))
+                .filter(n -> n.getTitle().toLowerCase().contains("re-approval") || 
+                           n.getTitle().toLowerCase().contains("rejected booking") ||
+                           n.getTitle().toLowerCase().contains("booking re-approval"))
                 .collect(Collectors.toList());
         
         List<Notification> generalInquiryNotifications = notifications.stream()
-                .filter(n -> !n.getTitle().toLowerCase().contains("client") && 
-                           !n.getTitle().toLowerCase().contains("create") &&
-                           !n.getTitle().toLowerCase().contains("cancel") && 
-                           !n.getTitle().toLowerCase().contains("cancelled") &&
-                           !n.getTitle().toLowerCase().contains("reject") && 
-                           !n.getTitle().toLowerCase().contains("rejected"))
+                .filter(n -> n.getTitle().toLowerCase().contains("general inquiry") || 
+                           n.getTitle().toLowerCase().contains("inquiry") ||
+                           n.getTitle().toLowerCase().contains("contact message"))
                 .collect(Collectors.toList());
         
         // Get counts for each type
