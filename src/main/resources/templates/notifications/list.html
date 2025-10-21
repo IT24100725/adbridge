@@ -4,225 +4,33 @@
 <section>
     <div class="section-head">
         <h1 class="page-title">Your Notifications</h1>
-        <div class="section-actions">
-            <form th:action="@{/notifications/mark-all-read}" method="post" style="display: inline;">
-                <button type="submit" class="btn-v2 secondary">Mark All as Read</button>
-            </form>
-        </div>
     </div>
 
-    <!-- Notification Summary Cards -->
-    <div class="notification-summary" th:if="${notifications != null and !notifications.empty}">
-        <div class="summary-card create-client">
-            <div class="summary-icon">👤</div>
-            <div class="summary-content">
-                <h3>Create New Client</h3>
-                <p th:text="${createClientCount} + ' notifications'">0 notifications</p>
-            </div>
-        </div>
-        <div class="summary-card cancel-booking">
-            <div class="summary-icon">❌</div>
-            <div class="summary-content">
-                <h3>Cancel Booking</h3>
-                <p th:text="${cancelBookingCount} + ' notifications'">0 notifications</p>
-            </div>
-        </div>
-        <div class="summary-card rejected-booking">
-            <div class="summary-icon">🔄</div>
-            <div class="summary-content">
-                <h3>Rejected Booking Request</h3>
-                <p th:text="${rejectedBookingCount} + ' notifications'">0 notifications</p>
-            </div>
-        </div>
-        <div class="summary-card general-inquiry">
-            <div class="summary-icon">💬</div>
-            <div class="summary-content">
-                <h3>General Inquiry</h3>
-                <p th:text="${generalInquiryCount} + ' notifications'">0 notifications</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Create New Client Notifications -->
-    <div class="notification-section" th:if="${createClientNotifications != null and !createClientNotifications.empty}">
-        <div class="section-header">
-            <h2 class="section-title create-client">
-                <span class="section-icon">👤</span>
-                Create New Client
-                <span class="badge" th:text="${createClientCount}">0</span>
-            </h2>
-        </div>
-        <div class="table-container">
-            <table class="notification-table">
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Message</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="notification : ${createClientNotifications}" 
-                        th:class="'notification-row' + (${notification.isRead} ? ' read' : ' unread')"
-                        class="notification-row">
-                        <td data-label="Title" th:text="${notification.title}">Notification Title</td>
-                        <td data-label="Message" th:text="${notification.message}">Notification message content</td>
-                        <td data-label="Date" th:text="${#temporals.format(notification.createdAt, 'MMM dd, yyyy HH:mm')}">Time</td>
-                        <td data-label="Status">
-                            <span th:if="${!notification.isRead}" class="status-badge unread">Unread</span>
-                            <span th:if="${notification.isRead}" class="status-badge read">Read</span>
-                        </td>
-                        <td data-label="Actions">
-                            <form th:if="${!notification.isRead}" th:action="@{'/notifications/' + ${notification.id} + '/mark-read'}" method="post" style="display: inline;">
-                                <button type="submit" class="btn-v2 xs primary">Mark as Read</button>
-                            </form>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Cancel Booking Notifications -->
-    <div class="notification-section" th:if="${cancelBookingNotifications != null and !cancelBookingNotifications.empty}">
-        <div class="section-header">
-            <h2 class="section-title cancel-booking">
-                <span class="section-icon">❌</span>
-                Cancel Booking
-                <span class="badge" th:text="${cancelBookingCount}">0</span>
-            </h2>
-        </div>
-        <div class="table-container">
-            <table class="notification-table">
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Message</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="notification : ${cancelBookingNotifications}" 
-                        th:class="'notification-row' + (${notification.isRead} ? ' read' : ' unread')"
-                        class="notification-row">
-                        <td data-label="Title" th:text="${notification.title}">Notification Title</td>
-                        <td data-label="Message" th:text="${notification.message}">Notification message content</td>
-                        <td data-label="Date" th:text="${#temporals.format(notification.createdAt, 'MMM dd, yyyy HH:mm')}">Time</td>
-                        <td data-label="Status">
-                            <span th:if="${!notification.isRead}" class="status-badge unread">Unread</span>
-                            <span th:if="${notification.isRead}" class="status-badge read">Read</span>
-                        </td>
-                        <td data-label="Actions">
-                            <form th:if="${!notification.isRead}" th:action="@{'/notifications/' + ${notification.id} + '/mark-read'}" method="post" style="display: inline;">
-                                <button type="submit" class="btn-v2 xs primary">Mark as Read</button>
-                            </form>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Rejected Booking Request Notifications -->
-    <div class="notification-section" th:if="${rejectedBookingNotifications != null and !rejectedBookingNotifications.empty}">
-        <div class="section-header">
-            <h2 class="section-title rejected-booking">
-                <span class="section-icon">🔄</span>
-                Rejected Booking Request
-                <span class="badge" th:text="${rejectedBookingCount}">0</span>
-            </h2>
-        </div>
-        <div class="table-container">
-            <table class="notification-table">
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Message</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="notification : ${rejectedBookingNotifications}" 
-                        th:class="'notification-row' + (${notification.isRead} ? ' read' : ' unread')"
-                        class="notification-row">
-                        <td data-label="Title" th:text="${notification.title}">Notification Title</td>
-                        <td data-label="Message" th:text="${notification.message}">Notification message content</td>
-                        <td data-label="Date" th:text="${#temporals.format(notification.createdAt, 'MMM dd, yyyy HH:mm')}">Time</td>
-                        <td data-label="Status">
-                            <span th:if="${!notification.isRead}" class="status-badge unread">Unread</span>
-                            <span th:if="${notification.isRead}" class="status-badge read">Read</span>
-                        </td>
-                        <td data-label="Actions">
-                            <form th:if="${!notification.isRead}" th:action="@{'/notifications/' + ${notification.id} + '/mark-read'}" method="post" style="display: inline;">
-                                <button type="submit" class="btn-v2 xs primary">Mark as Read</button>
-                            </form>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- General Inquiry Notifications -->
-    <div class="notification-section" th:if="${generalInquiryNotifications != null and !generalInquiryNotifications.empty}">
-        <div class="section-header">
-            <h2 class="section-title general-inquiry">
-                <span class="section-icon">💬</span>
-                General Inquiry
-                <span class="badge" th:text="${generalInquiryCount}">0</span>
-            </h2>
-        </div>
-        <div class="table-container">
-            <table class="notification-table">
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Message</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="notification : ${generalInquiryNotifications}" 
-                        th:class="'notification-row' + (${notification.isRead} ? ' read' : ' unread')"
-                        class="notification-row">
-                        <td data-label="Title" th:text="${notification.title}">Notification Title</td>
-                        <td data-label="Message" th:text="${notification.message}">Notification message content</td>
-                        <td data-label="Date" th:text="${#temporals.format(notification.createdAt, 'MMM dd, yyyy HH:mm')}">Time</td>
-                        <td data-label="Status">
-                            <span th:if="${!notification.isRead}" class="status-badge unread">Unread</span>
-                            <span th:if="${notification.isRead}" class="status-badge read">Read</span>
-                        </td>
-                        <td data-label="Actions">
-                            <form th:if="${!notification.isRead}" th:action="@{'/notifications/' + ${notification.id} + '/mark-read'}" method="post" style="display: inline;">
-                                <button type="submit" class="btn-v2 xs primary">Mark as Read</button>
-                            </form>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+    <!-- Simple Notifications Table -->
+    <div class="table-container" th:if="${notifications != null and !notifications.empty}">
+        <table class="notification-table">
+            <thead>
+                <tr>
+                    <th>Message (Client Request)</th>
+                    <th>Reply (CSO Response)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="notification : ${notifications}" 
+                    th:class="'notification-row' + (${notification.isRead} ? ' read' : ' unread')"
+                    class="notification-row">
+                    <td data-label="Message" th:text="${notification.message}">Client request message</td>
+                    <td data-label="Reply" th:text="${notification.title}">CSO reply message</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
     
     <!-- Welcome message when no notifications -->
     <div th:if="${notifications == null or notifications.empty}" class="welcome-message">
         <div class="welcome-icon">🔔</div>
-        <h2>Welcome to Notifications!</h2>
-        <p>This is your notifications page. Here you'll receive updates about:</p>
-        <ul>
-            <li>Create New Client requests</li>
-            <li>Cancel Booking requests</li>
-            <li>Rejected Booking re-approval requests</li>
-            <li>General inquiries and other messages</li>
-        </ul>
-        <p><strong>Stay tuned for more features coming soon!</strong></p>
+        <h2>No Notifications Yet</h2>
+        <p>You'll see your client requests and CSO replies here once they start coming in.</p>
     </div>
 </section>
 
